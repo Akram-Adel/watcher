@@ -1,20 +1,18 @@
-import { Client } from 'fb-watchman';
-
 export default class ErrorHandler {
-  private client: Client
-
-  constructor(client: Client) {
-    this.client = client;
+  throwIf(error?: Error | null): void {
+    if (error) {
+      process.exitCode = -1;
+      throw error;
+    }
   }
 
-  throwIf(error?: Error | null) {
-    if (error) this.throw(error);
-  }
+  throwCoded(code: number): void {
+    process.exitCode = code;
 
-  throw(error: Error): void {
-    console.log(error);
-
-    this.client.end();
-    process.exit(0);
+    switch (code) {
+      case 1:
+      default:
+        throw new Error('no/invalid directory provided');
+    }
   }
 }

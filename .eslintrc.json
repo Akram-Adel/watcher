@@ -1,10 +1,13 @@
 {
   "env": {
     "browser": true,
-    "es2021": true
+    "es2021": true,
+    "jest/globals": true
   },
   "extends": [
-    "airbnb-base"
+    "airbnb-base",
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
   ],
   "ignorePatterns": "build/**",
   "parser": "@typescript-eslint/parser",
@@ -13,9 +16,13 @@
     "sourceType": "module"
   },
   "plugins": [
-    "@typescript-eslint"
+    "@typescript-eslint",
+    "jest"
   ],
   "rules": {
+    "@typescript-eslint/explicit-module-boundary-types": "error",
+    "array-element-newline": ["error", "consistent"],
+    "array-bracket-newline": ["error", {"multiline": true}],
     "class-methods-use-this": "off",
     "import/extensions": ["error", "ignorePackages", {"ts": "never", "tsx": "never"}],
     "lines-between-class-members": ["error", "always", { "exceptAfterSingleLine": true }],

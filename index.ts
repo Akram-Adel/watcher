@@ -1,63 +1,85 @@
+import fs from 'fs';
 import watchman from 'fb-watchman';
 
 import ErrorHandler from './errorHandler';
 import SyncHandler, { File } from './syncHandler';
 
+export type Obj = { [key: string]: any }
+
+const isTesting: boolean = (() => {
+  const process1 = process.argv[0].split('/');
+  const process2 = process.argv[1].split('/');
+
+  return process1[process1.length - 1] === 'node'
+    && process2[process2.length - 1] === 'jest';
+})();
+
+if (!isTesting) main();
+
 const client = new watchman.Client();
-const errorHandler = new ErrorHandler(client);
+const errorHandler = new ErrorHandler();
 const subscriptionName = 'watchman-subscription';
-let syncHandler: SyncHandler;
+const syncHandler = new SyncHandler();
 
-client.capabilityCheck({ optional: [], required: ['relative_root'] }, (capabilityCheckError) => {
-  errorHandler.throwIf(capabilityCheckError);
+function main(): void {
+  client.capabilityCheck({ optional: [], required: ['relative_root'] }, (error) => {
+    errorHandler.throwIf(error);
 
-  // Initiate the watch
-  client.command(['watch-project', getToWatchDirectory()], handleProjectWatch);
-});
+    client.command(['watch-project', getDirectory()], handleWatchCommand);
+  });
+}
 
-function handleProjectWatch(error?: Error | null, resp?: any) {
+function handleWatchCommand(error?: Error | null, resp?: any) {
   errorHandler.throwIf(error);
   if ('warning' in resp) console.log('warning: ', resp.warning);
   console.log('>> watch established on ', resp.watch, ' relative_path', resp.relative_path);
 
-  syncHandler = new SyncHandler(getToWatchDirectory());
-  handleSubscription(resp.watch, resp.relative_path);
+  syncHandler.setDir(getDirectory());
+  issueClockedSubscription(resp);
+  subscribeToIssuedSubscription();
 }
 
-function getToWatchDirectory(): string {
+function getDirectory(): string {
   const dir: string | undefined = process.argv[2];
-  if (!dir) errorHandler.throw(new Error('no directory provided'));
+  if (!dir || !fs.existsSync(dir)) errorHandler.throwCoded(1);
   return dir;
 }
 
-function handleSubscription(watch: any, relativePath: any) {
-  issueSubscription(watch, relativePath);
+function issueClockedSubscription(watchResponse: any) {
+  client.command(['clock', watchResponse.watch], (clockError, clockResponse) => {
+    errorHandler.throwIf(clockError);
 
+    const subscribeCommand = [
+      'subscribe',
+      watchResponse.watch,
+      subscriptionName,
+      getSubscriptionObj(clockResponse, watchResponse),
+    ];
+
+    client.command(subscribeCommand, (subError, subResponse) => {
+      errorHandler.throwIf(subError);
+      console.log(`>> subscription ${subResponse?.subscribe} established`);
+    });
+  });
+}
+
+function subscribeToIssuedSubscription() {
   client.on('subscription', (resp) => {
     if (resp.subscription !== subscriptionName) return;
     resp.files.forEach((file: File) => syncHandler.syncFile(file));
   });
 }
 
-function issueSubscription(watch: any, relativePath: any) {
-  client.command(['clock', watch], (clockError, clockResponse) => {
-    errorHandler.throwIf(clockError);
-
-    const subscribe = ['subscribe', watch, subscriptionName, getSubscriptionObj(clockResponse, relativePath)];
-    client.command(subscribe, (error, resp) => {
-      errorHandler.throwIf(error);
-      console.log(`>> subscription ${resp.subscribe} established`);
-    });
-  });
-}
-
-function getSubscriptionObj(clockResponse: any, relativePath: any): { [key: string]: any; } {
-  const subscriptionObj: { [key: string]: any; } = {
+function getSubscriptionObj(clockResponse: Obj, watchResponse?: Obj): Obj {
+  return {
     expression: ['suffix', ['js', 'ts']],
     fields: ['name', 'exists'],
     since: clockResponse.clock,
+    relative_root: watchResponse?.relative_path,
   };
-  if (relativePath) subscriptionObj.relative_root = relativePath;
-
-  return subscriptionObj;
 }
+
+export {
+  client, subscriptionName, syncHandler, getSubscriptionObj,
+};
+export default main;
