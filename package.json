@@ -1,0 +1,24 @@
+{
+  "name": "watchman",
+  "version": "1.0.0",
+  "private": true,
+  "author": "Akram-Adel<akrmadel33@gmail.com>",
+  "license": "MIT",
+  "main": "build/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "fb-watchman": "^2.0.1"
+  },
+  "devDependencies": {
+    "@types/fb-watchman": "^2.0.1",
+    "@types/node": "^16.7.1",
+    "@typescript-eslint/eslint-plugin": "^4.29.2",
+    "@typescript-eslint/parser": "^4.29.2",
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.24.1",
+    "typescript": "^4.3.5"
+  }
+}
