@@ -1,4 +1,4 @@
-export default class ErrorHandler {
+class ErrorHandler {
   throwIf(error?: Error | null): void {
     if (error) {
       process.exitCode = -1;
@@ -6,7 +6,7 @@ export default class ErrorHandler {
     }
   }
 
-  throwCoded(code: number): void {
+  throwCoded(code: number): never {
     process.exitCode = code;
 
     switch (code) {
@@ -16,3 +16,6 @@ export default class ErrorHandler {
     }
   }
 }
+
+const errorHander = new ErrorHandler();
+export default errorHander;
