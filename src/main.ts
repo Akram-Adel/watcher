@@ -21,9 +21,10 @@ function handleWatchCommand(error?: Error | null, resp?: any) {
   errorHandler.throwIf(error);
 
   /* istanbul ignore next */
-  if ('warning' in resp) console.log('warning: ', resp.warning);
-
-  console.log('>> watch established on ', resp.watch, ' relative_path', resp.relative_path);
+  if (!process.env.NODE_ENV) {
+    if ('warning' in resp) console.log('warning: ', resp.warning);
+    console.log('>> watch established on ', resp.watch, ' relative_path', resp.relative_path);
+  }
 
   issueClockedSubscription(resp);
   subscribeToIssuedSubscription();
@@ -42,7 +43,11 @@ function issueClockedSubscription(watchResponse: any) {
 
     client.command(subscribeCommand, (subError, subResponse) => {
       errorHandler.throwIf(subError);
-      console.log(`>> subscription ${subResponse?.subscribe} established`);
+
+      /* istanbul ignore next */
+      if (!process.env.NODE_ENV) {
+        console.log(`>> subscription ${subResponse?.subscribe} established`);
+      }
     });
   });
 }

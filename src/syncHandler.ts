@@ -27,19 +27,15 @@ class SyncHandler {
   }
 
   syncFile(file: File): void {
-    this.checkRoots();
-
     if (!fs.existsSync(this.getFileDist(file.name))) this.handleFileCreation(file.name);
     else if (!file.exists) this.handleFileDeletion(file.name);
     else this.copyFile(file.name, 'Yellow');
   }
 
-  private checkRoots() {
-    if (!this.fromRoot || !this.toRoot) throw new Error('SyncHandler roots are not defined');
-  }
-
   private handleFileCreation(fileName: string) {
     const distDir = this.getDistDir(fileName);
+
+    /* istanbul ignore else */
     if (!fs.existsSync(distDir)) fs.mkdirSync(distDir, { recursive: true });
 
     this.copyFile(fileName, 'Green');

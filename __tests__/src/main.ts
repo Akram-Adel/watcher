@@ -74,10 +74,14 @@ describe('index', () => {
       expression: ['suffix', ['js', 'ts']],
       fields: ['name', 'exists'],
       since: mockClockResponse.clock,
-      relative_root: mockWatchResponse.relative_path,
+      relative_root: mockWatchResponse.relative_path as string | undefined,
     };
 
-    const subscriptionObj = getSubscriptionObj(mockClockResponse, mockWatchResponse);
+    let subscriptionObj = getSubscriptionObj(mockClockResponse, mockWatchResponse);
+    expect(subscriptionObj).toEqual(clockedSubscriptionObj);
+
+    delete clockedSubscriptionObj.relative_root;
+    subscriptionObj = getSubscriptionObj(mockClockResponse);
     expect(subscriptionObj).toEqual(clockedSubscriptionObj);
   });
 
