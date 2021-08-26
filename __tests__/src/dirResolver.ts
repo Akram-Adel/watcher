@@ -1,4 +1,5 @@
-import dirResolver, { projectsRoot } from '../../src/dirResolver';
+import dirResolver from '../../src/dirResolver';
+import configs from '../../configs.json';
 
 jest.mock('fs', () => ({
   existsSync: jest.fn((i: string) => !i.includes('invalid')),
@@ -18,16 +19,22 @@ describe('dirResolver', () => {
     expect(dirResolver()).toBe('valid');
   });
 
-  it('should resolve project flag correctly', () => {
-    const projectName = 'ProjectName';
-    process.argv = ['node', 'jest', `--project=${projectName}`];
+  it('should throw when given --project flag without project configuration', () => {
+    jest.resetModules();
+    jest.setMock('../../configs.json', ({ }));
+    const dirResolverReq = require('../../src/dirResolver').default;
 
-    expect(dirResolver()).toBe(`${projectsRoot}${projectName}`);
+    process.argv = ['node', 'jest', '--project=Project'];
+    expect(() => dirResolverReq()).toThrow();
+  });
+
+  it('should resolve --project flag correctly', () => {
+    process.argv = ['node', 'jest', '--project=name'];
+    expect(dirResolver()).toBe(`${configs.project}name`);
   });
 
   it('should throw if resolved project is an invalid directory', () => {
     process.argv = ['node', 'jest', '--project=invalid'];
-
     expect(() => dirResolver()).toThrow();
   });
 });

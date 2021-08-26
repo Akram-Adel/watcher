@@ -10,6 +10,9 @@ class ErrorHandler {
     process.exitCode = code;
 
     switch (code) {
+      case 2:
+        throw new Error('invalid project configurations');
+
       case 1:
       default:
         throw new Error('no/invalid directory provided');
@@ -17,5 +20,5 @@ class ErrorHandler {
   }
 }
 
-const errorHander = new ErrorHandler();
-export default errorHander;
+const errorHandler = new ErrorHandler();
+export default errorHandler;

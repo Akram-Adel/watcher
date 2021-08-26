@@ -1,6 +1,7 @@
 import fs from 'fs';
 
-import syncHandler, { root } from '../../src/syncHandler';
+import syncHandler from '../../src/syncHandler';
+import configs from '../../configs.json';
 
 jest.mock('fs', () => ({
   copyFileSync: jest.fn(),
@@ -24,16 +25,22 @@ jest.mock('../../src/dirResolver', () => jest.fn(() => 'REMOVED-ACTUAL-project')
 function getFile(type: 'src' | 'dist', f?: string): string {
   let file = (type === 'src')
     ? 'REMOVED-ACTUAL-project'
-    : `${root}project`;
+    : `${configs.root}project`;
 
   if (f) file += `/${f}`;
   return file;
 }
 
 describe('SyncHandler', () => {
+  it('should throw when root configuration it not defined', () => {
+    jest.resetModules();
+    jest.setMock('../../configs.json', ({ }));
+    expect(() => require('../../src/syncHandler').default).toThrow();
+  });
+
   it('should set from/to roots correctly', () => {
     expect(syncHandler.from).toBe('REMOVED-ACTUAL-project');
-    expect(syncHandler.to).toBe(`${root}project`);
+    expect(syncHandler.to).toBe(`${configs.root}project`);
   });
 
   /** @calls existsSync */

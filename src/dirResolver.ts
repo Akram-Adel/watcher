@@ -1,8 +1,7 @@
 import fs from 'fs';
 
 import errorHandler from './errorHandler';
-
-export const projectsRoot = `${process.env.HOME}/Documents/REMOVED-ACTUAL-`;
+import configs from '../configs.json';
 
 export default function dirResolver(): string {
   return (hasInputFlag('--project='))
@@ -11,12 +10,13 @@ export default function dirResolver(): string {
 }
 
 function resolveProject(): string | never {
-  let dir: string | undefined;
+  if (!configs.project) errorHandler.throwCoded(2);
+  let dir = configs.project;
 
   const flag = '--project=';
   for (let i = 0; i < process.argv.length; i += 1) {
     const input = process.argv[i];
-    if (input.includes(flag)) dir = `${projectsRoot}${input.slice(flag.length)}`;
+    if (input.includes(flag)) dir += input.slice(flag.length);
   }
 
   return (isValidDir(dir)) ? dir : errorHandler.throwCoded(1);

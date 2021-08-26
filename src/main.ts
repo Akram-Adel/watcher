@@ -4,7 +4,7 @@ import errorHandler from './errorHandler';
 import syncHandler, { File } from './syncHandler';
 import dirResolver from './dirResolver';
 
-export type Obj = { [key: string]: any }
+type Obj = { [key: string]: any }
 
 export const client = new watchman.Client();
 export const subscriptionName = 'watchman-subscription';

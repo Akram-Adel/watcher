@@ -1,11 +1,11 @@
 import fs from 'fs';
 
+import errorHandler from './errorHandler';
 import dirResolver from './dirResolver';
+import configs from '../configs.json';
 
 export type File = { name: string, exists: boolean }
 type LogColors = 'Green' | 'Yellow' | 'Red';
-
-export const root = `${process.env.HOME}/Documents/REMOVED-ACTUAL/REMOVED-ACTUAL-`;
 
 class SyncHandler {
   get from(): string | undefined { return this.fromRoot; }
@@ -15,6 +15,7 @@ class SyncHandler {
   private toRoot?: string
 
   constructor() {
+    if (!configs.root) errorHandler.throwCoded(2);
     const dir = dirResolver();
 
     this.fromRoot = dir;
@@ -23,7 +24,7 @@ class SyncHandler {
     const project = dirArray[dirArray.length - 1]
       .substr(String('REMOVED-ACTUAL-').length)
       .toLocaleLowerCase();
-    this.toRoot = root + project;
+    this.toRoot = configs.root + project;
   }
 
   syncFile(file: File): void {
