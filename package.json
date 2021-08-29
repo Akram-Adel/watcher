@@ -6,7 +6,7 @@
   "license": "MIT",
   "main": "build/index.js",
   "scripts": {
-    "test": "jest --watch"
+    "test": "jest --watch --silent"
   },
   "dependencies": {
     "fb-watchman": "^2.0.1"

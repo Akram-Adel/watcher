@@ -81,7 +81,10 @@ class SyncHandler {
     const colorNum = (color === 'Green') ? 2
       : (color === 'Yellow') ? 3
         : 1;
-    console.log(`\x1b[3${colorNum}m`, 'sync changes from', fileName);
+
+    console.log(`\x1b[3${colorNum}m`,
+      'sync changes from', fileName,
+      '\x1b[0m');
   }
 }
 
