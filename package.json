@@ -1,5 +1,5 @@
 {
-  "name": "watchman",
+  "name": "watcher",
   "version": "1.0.0",
   "private": true,
   "author": "Akram-Adel<akrmadel33@gmail.com>",
@@ -8,6 +8,9 @@
   "scripts": {
     "prepare": "husky install",
     "test": "jest --watch --silent"
+  },
+  "bin": {
+    "watcher": "build/index.js"
   },
   "dependencies": {
     "fb-watchman": "^2.0.1"

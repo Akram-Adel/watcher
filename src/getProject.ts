@@ -3,7 +3,7 @@ import fs from 'fs';
 import errorHandler from './errorHandler';
 import configs from '../configs.json';
 
-export default function dirResolver(): string {
+export default function getProject(): string {
   return (hasInputFlag('--project='))
     ? resolveProject()
     : resolveAbsolutePath();

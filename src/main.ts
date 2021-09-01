@@ -2,7 +2,7 @@ import watchman from 'fb-watchman';
 
 import errorHandler from './errorHandler';
 import syncHandler, { File } from './syncHandler';
-import dirResolver from './dirResolver';
+import getProject from './getProject';
 
 type Obj = { [key: string]: any }
 
@@ -13,7 +13,7 @@ export default function main(): void {
   client.capabilityCheck({ optional: [], required: ['relative_root'] }, (error) => {
     errorHandler.throwIf(error);
 
-    client.command(['watch-project', dirResolver()], handleWatchCommand);
+    client.command(['watch-project', getProject()], handleWatchCommand);
   });
 }
 
@@ -21,13 +21,8 @@ function handleWatchCommand(error?: Error | null, resp?: any) {
   errorHandler.throwIf(error);
 
   /* istanbul ignore next */
-  if ('warning' in resp) {
-    console.log('\x1b[45m\x1b[30m', 'WARNING', '\x1b[0m',
-      resp.warning);
-  }
-
-  console.log('\x1b[42m\x1b[30m', 'SUCCESS', '\x1b[0m',
-    'watch established on ', resp.watch, ' relative_path', resp.relative_path);
+  if ('warning' in resp) mainLog('WARNING', resp.warning);
+  mainLog('SUCESS', 'watch established on', resp.watch, 'relative_path', resp.relative_path);
 
   issueClockedSubscription(resp);
   subscribeToIssuedSubscription();
@@ -48,8 +43,7 @@ function issueClockedSubscription(watchResponse: any) {
       errorHandler.throwIf(subError);
 
       /* istanbul ignore next */
-      console.log('\x1b[42m\x1b[30m', 'SUCCESS', '\x1b[0m',
-        'subscription', subResponse?.subscribe, 'established');
+      mainLog('SUCESS', 'subscription', subResponse?.subscribe, 'established');
     });
   });
 }
@@ -59,6 +53,14 @@ function subscribeToIssuedSubscription() {
     if (resp.subscription !== subscriptionName) return;
     resp.files.forEach((file: File) => syncHandler.syncFile(file));
   });
+}
+
+function mainLog(type: 'SUCESS' | 'WARNING', ...log: Array<any>) {
+  /* istanbul ignore next */
+  const decoration = (type === 'SUCESS') ? '\x1b[42m\x1b[30m'
+    : '\x1b[45m\x1b[30m';
+
+  console.log(decoration, type, '\x1b[0m', ...log);
 }
 
 export function getSubscriptionObj(clockResponse: Obj, watchResponse?: Obj): Obj {

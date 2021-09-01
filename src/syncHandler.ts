@@ -1,11 +1,12 @@
 import fs from 'fs';
 
 import errorHandler from './errorHandler';
-import dirResolver from './dirResolver';
+import getProject from './getProject';
+import getFile from './getFile';
 import configs from '../configs.json';
 
 export type File = { name: string, exists: boolean }
-type LogColors = 'Green' | 'Yellow' | 'Red';
+type LogColors = 'Green' | 'Yellow' | 'Red' | 'Magenta';
 
 class SyncHandler {
   get from(): string | undefined { return this.fromRoot; }
@@ -16,21 +17,28 @@ class SyncHandler {
 
   constructor() {
     if (!configs.root) errorHandler.throwCoded(2);
-    const dir = dirResolver();
+    const project = getProject();
 
-    this.fromRoot = dir;
+    this.fromRoot = project;
 
-    const dirArray = dir.split('/');
-    const project = dirArray[dirArray.length - 1]
+    const dirArray = project.split('/');
+    const pkgName = dirArray[dirArray.length - 1]
       .substr(String('REMOVED-ACTUAL-').length)
       .toLocaleLowerCase();
-    this.toRoot = configs.root + project;
+    this.toRoot = configs.root + pkgName;
   }
 
-  syncFile(file: File): void {
-    if (!fs.existsSync(this.getFileDist(file.name))) this.handleFileCreation(file.name);
+  syncFile(subscriptionFile: File): void {
+    const file = getFile(subscriptionFile);
+
+    if (!file) this.ignoreFile(subscriptionFile);
+    else if (!fs.existsSync(this.getFileDist(file.name))) this.handleFileCreation(file.name);
     else if (!file.exists) this.handleFileDeletion(file.name);
     else this.copyFile(file.name, 'Yellow');
+  }
+
+  private ignoreFile(subscriptionFile: File) {
+    this.colorfulLog('Magenta', subscriptionFile.name, 'ignore');
   }
 
   private handleFileCreation(fileName: string) {
@@ -77,13 +85,14 @@ class SyncHandler {
     return `${this.to}/${fileName}`;
   }
 
-  private colorfulLog(color: LogColors, fileName: string): void {
+  private colorfulLog(color: LogColors, fileName: string, process = 'sync'): void {
     const colorNum = (color === 'Green') ? 2
       : (color === 'Yellow') ? 3
-        : 1;
+        : (color === 'Red') ? 1
+          : 5;
 
     console.log(`\x1b[3${colorNum}m`,
-      'sync changes from', fileName,
+      process, 'changes from', fileName,
       '\x1b[0m');
   }
 }

@@ -12,7 +12,12 @@ jest.mock('fs', () => ({
   readdirSync: jest.fn(() => ['file']),
 }));
 
-jest.mock('../../src/dirResolver', () => jest.fn(() => 'REMOVED-ACTUAL-project'));
+jest.mock('../../src/getProject', () => jest.fn(() => 'REMOVED-ACTUAL-project'));
+
+jest.mock('../../configs.json', () => ({
+  ...jest.requireActual('../../configs.json') as any,
+  fileIgnorePattern: ['__tests__'],
+}));
 
 function getPath(type: 'src' | 'dist', name?: string): string {
   let path = (type === 'src')
@@ -33,6 +38,14 @@ describe('SyncHandler', () => {
   it('should set from/to roots correctly', () => {
     expect(syncHandler.from).toBe('REMOVED-ACTUAL-project');
     expect(syncHandler.to).toBe(`${configs.root}project`);
+  });
+
+  it('should ignore tests files', () => {
+    syncHandler.syncFile({ name: '__tests__/name.js', exists: true });
+
+    expect(fs.copyFileSync).not.toHaveBeenCalled();
+    expect(fs.mkdirSync).not.toHaveBeenCalled();
+    expect(fs.rmSync).not.toHaveBeenCalled();
   });
 
   it('should copy existing/new file', () => {
