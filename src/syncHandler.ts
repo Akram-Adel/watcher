@@ -17,8 +17,8 @@ class SyncHandler {
 
   constructor() {
     if (!configs.root) errorHandler.throwCoded(2);
-    const project = getProject();
 
+    const project = getProject();
     this.fromRoot = project;
 
     const dirArray = project.split('/');
@@ -32,7 +32,7 @@ class SyncHandler {
     const file = getFile(subscriptionFile);
 
     if (!file) this.ignoreFile(subscriptionFile);
-    else if (!fs.existsSync(this.getFileDist(file.name))) this.handleFileCreation(file.name);
+    else if (!this.distFileExist(file)) this.handleFileCreation(file.name);
     else if (!file.exists) this.handleFileDeletion(file.name);
     else this.copyFile(file.name, 'Yellow');
   }
@@ -51,7 +51,7 @@ class SyncHandler {
   }
 
   private handleFileDeletion(fileName: string) {
-    fs.rmSync(this.getFileDist(fileName));
+    fs.rmSync(this.getDistFile(fileName));
 
     this.deleteDir(this.getDistDir(fileName));
 
@@ -59,7 +59,7 @@ class SyncHandler {
   }
 
   private copyFile(fileName: string, color: LogColors) {
-    fs.copyFileSync(this.getFileSrc(fileName), this.getFileDist(fileName));
+    fs.copyFileSync(this.getSrcFile(fileName), this.getDistFile(fileName));
 
     this.colorfulLog(color, fileName);
   }
@@ -73,15 +73,15 @@ class SyncHandler {
   }
 
   private getDistDir(fileName: string): string {
-    const fileDist = this.getFileDist(fileName);
-    return fileDist.slice(0, fileDist.lastIndexOf('/'));
+    const distFile = this.getDistFile(fileName);
+    return distFile.slice(0, distFile.lastIndexOf('/'));
   }
 
-  private getFileSrc(fileName: string): string {
+  private getSrcFile(fileName: string): string {
     return `${this.from}/${fileName}`;
   }
 
-  private getFileDist(fileName: string): string {
+  private getDistFile(fileName: string): string {
     return `${this.to}/${fileName}`;
   }
 
@@ -95,6 +95,8 @@ class SyncHandler {
       process, 'changes from', fileName,
       '\x1b[0m');
   }
+
+  private distFileExist = (file: File): boolean => fs.existsSync(this.getDistFile(file.name))
 }
 
 const syncHandler = new SyncHandler();

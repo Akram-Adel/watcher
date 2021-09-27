@@ -3,9 +3,9 @@ import { doneCallback } from 'fb-watchman';
 import main, { client, subscriptionName, getSubscriptionObj } from '../../src/main';
 import syncHandler from '../../src/syncHandler';
 
+const mockOnSubscription = { subscription: subscriptionName, files: [{ name: 'any' }] };
 const mockWatchResponse = { watch: 'valid', relative_path: 'root' };
 const mockClockResponse = { clock: 100 };
-const mockOnSubscription = { subscription: subscriptionName, files: [{ name: 'any' }] };
 
 jest.mock('fb-watchman', () => ({
   Client: jest.fn().mockImplementation(() => ({
