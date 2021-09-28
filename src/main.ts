@@ -10,7 +10,8 @@ export const client = new watchman.Client();
 export const subscriptionName = 'watchman-subscription';
 
 export default function main(): void {
-  client.capabilityCheck({ optional: [], required: ['relative_root'] }, (error) => {
+  const capabilityChecks = ['relative_root', 'suffix-set'];
+  client.capabilityCheck({ optional: [], required: capabilityChecks }, (error) => {
     errorHandler.throwIf(error);
 
     client.command(['watch-project', getProject()], handleWatchCommand);
