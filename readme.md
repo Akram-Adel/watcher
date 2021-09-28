@@ -20,8 +20,9 @@ Open the `configs.json` file in your favorite editor and change the `root` to po
 **Note:** *If your project folder name is different than it's package name (e.g. folder name is `Login` and package name is `Project-Login`), then a `SUB-NAME` of `Project-` has to be added to the `root` configuration for the script to work properly. The script appends the project name (e.g. `Login`) to the end of the `root` string you provided. \
 In the future, we will change the script to read the project name directly from the `package.json` file to avoid this hassle*
 
-Add the script to your global packages
+Build the script then add it to your global packages
 ```sh
+npx tsc
 sudo npm i -g .
 ```
 
