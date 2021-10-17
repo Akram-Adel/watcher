@@ -1,6 +1,9 @@
-const mockFile = { name: 'name' };
+import { File } from '../../../src/syncHandler';
+import getFile from '../../../src/resolvers/getFile';
 
-function getMockedFn(fileIgnorePattern: Array<string> | undefined) {
+const mockFile: File = { name: 'name', exists: true };
+
+function mockGetFile(fileIgnorePattern: Array<string> | undefined): typeof getFile {
   jest.resetModules();
   jest.setMock('../../../configs.json', ({ fileIgnorePattern }));
   return require('../../../src/resolvers/getFile').default;
@@ -8,40 +11,29 @@ function getMockedFn(fileIgnorePattern: Array<string> | undefined) {
 
 describe('getFile', () => {
   it('should return file when no fileIgnorePattern in configs', () => {
-    const getFileReq = getMockedFn(undefined);
-    expect(getFileReq(mockFile)).toBe(mockFile);
+    expect(mockGetFile(undefined)(mockFile)).toBe(mockFile);
   });
 
   it('should return file when fileIgnorePattern is empty', () => {
-    const getFileReq = getMockedFn([]);
-    expect(getFileReq(mockFile)).toBe(mockFile);
+    expect(mockGetFile([])(mockFile)).toBe(mockFile);
   });
 
   it('should return undefined when one of fileIgnorePattern match file name', () => {
-    let getFileReq = getMockedFn(['.+']);
-    expect(getFileReq(mockFile)).toBe(undefined);
-
-    getFileReq = getMockedFn(['na']);
-    expect(getFileReq(mockFile)).toBe(undefined);
+    expect(mockGetFile(['.+'])(mockFile)).toBe(undefined);
+    expect(mockGetFile(['na'])(mockFile)).toBe(undefined);
   });
 
   it('should return file when none of fileIgnorePattern match file name', () => {
-    let getFileReq = getMockedFn(['unmatch']);
-    expect(getFileReq(mockFile)).toBe(mockFile);
-
-    getFileReq = getMockedFn(['naS']);
-    expect(getFileReq(mockFile)).toBe(mockFile);
+    expect(mockGetFile(['unmatch'])(mockFile)).toBe(mockFile);
+    expect(mockGetFile(['naS'])(mockFile)).toBe(mockFile);
   });
 
   it('should return undefined when the second matcher match file name', () => {
-    const getFileReq = getMockedFn(['unmatch', '.+']);
-    expect(getFileReq(mockFile)).toBe(undefined);
+    expect(mockGetFile(['unmatch', '.+'])(mockFile)).toBe(undefined);
   });
 
   it('should return undefined when matcher matches file directory', () => {
-    const mockFileDirectory = { name: '__test__/name.js' };
-
-    const getFileReq = getMockedFn(['__test__']);
-    expect(getFileReq(mockFileDirectory)).toBe(undefined);
+    const mockFileDirectory: File = { name: '__test__/name.js', exists: true };
+    expect(mockGetFile(['__test__'])(mockFileDirectory)).toBe(undefined);
   });
 });
