@@ -82,6 +82,6 @@ After running the script and linking the project you are working on with the roo
 - Write tests for new functionality
 
 ## TODO
-- [ ] Read projectName from project's package.json file
+- [x] Read projectName from project's package.json file
 - [ ] Replace `root` and `project` with an `aliase` object
 - [ ] Change usage to `watcher --project=<projectName> --root=<rootName>` with `defaultRoot` accepted in the config file

@@ -10,12 +10,16 @@ class ErrorHandler {
     process.exitCode = code;
 
     switch (code) {
+      case 1:
+        throw new Error('no/invalid directory provided');
       case 2:
         throw new Error('invalid project configurations');
+      case 3:
+        throw new Error('no/invalid project package.json');
 
-      case 1:
+      case 0:
       default:
-        throw new Error('no/invalid directory provided');
+        throw new Error('internal script error');
     }
   }
 }

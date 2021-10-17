@@ -1,9 +1,8 @@
 import fs from 'fs';
 
-import errorHandler from './errorHandler';
 import getProject from './resolvers/getProject';
 import getFile from './resolvers/getFile';
-import configs from '../configs.json';
+import getRoot from './resolvers/getRoot';
 
 export type File = { name: string, exists: boolean }
 type LogColors = 'Green' | 'Yellow' | 'Red' | 'Magenta';
@@ -16,16 +15,8 @@ class SyncHandler {
   private toRoot?: string
 
   constructor() {
-    if (!configs.root) errorHandler.throwCoded(2);
-
-    const project = getProject();
-    this.fromRoot = project;
-
-    const dirArray = project.split('/');
-    const pkgName = dirArray[dirArray.length - 1]
-      .substr(String('REMOVED-ACTUAL-').length)
-      .toLocaleLowerCase();
-    this.toRoot = configs.root + pkgName;
+    this.fromRoot = getProject();
+    this.toRoot = getRoot();
   }
 
   syncFile(subscriptionFile: File): void {

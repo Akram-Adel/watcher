@@ -1,7 +1,6 @@
 import fs from 'fs';
 
 import syncHandler from '../../src/syncHandler';
-import configs from '../../configs.json';
 
 jest.mock('fs', () => ({
   copyFileSync: jest.fn(),
@@ -12,7 +11,8 @@ jest.mock('fs', () => ({
   readdirSync: jest.fn(() => ['file']),
 }));
 
-jest.mock('../../src/resolvers/getProject', () => jest.fn(() => 'REMOVED-ACTUAL-project'));
+jest.mock('../../src/resolvers/getProject', () => jest.fn(() => 'project'));
+jest.mock('../../src/resolvers/getRoot', () => jest.fn(() => 'root'));
 
 jest.mock('../../configs.json', () => ({
   ...jest.requireActual('../../configs.json') as any,
@@ -20,24 +20,15 @@ jest.mock('../../configs.json', () => ({
 }));
 
 function getPath(type: 'src' | 'dist', name?: string): string {
-  let path = (type === 'src')
-    ? 'REMOVED-ACTUAL-project'
-    : `${configs.root}project`;
-
+  let path = (type === 'src') ? 'project' : 'root';
   if (name) path += `/${name}`;
   return path;
 }
 
 describe('SyncHandler', () => {
-  it('should throw when root configuration it not defined', () => {
-    jest.resetModules();
-    jest.setMock('../../configs.json', ({ }));
-    expect(() => require('../../src/syncHandler').default).toThrow();
-  });
-
   it('should set from/to roots correctly', () => {
-    expect(syncHandler.from).toBe('REMOVED-ACTUAL-project');
-    expect(syncHandler.to).toBe(`${configs.root}project`);
+    expect(syncHandler.from).toBe('project');
+    expect(syncHandler.to).toBe('root');
   });
 
   it('should ignore tests files', () => {
