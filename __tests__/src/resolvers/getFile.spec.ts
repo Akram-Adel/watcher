@@ -2,8 +2,8 @@ const mockFile = { name: 'name' };
 
 function getMockedFn(fileIgnorePattern: Array<string> | undefined) {
   jest.resetModules();
-  jest.setMock('../../configs.json', ({ fileIgnorePattern }));
-  return require('../../src/getFile').default;
+  jest.setMock('../../../configs.json', ({ fileIgnorePattern }));
+  return require('../../../src/resolvers/getFile').default;
 }
 
 describe('getFile', () => {

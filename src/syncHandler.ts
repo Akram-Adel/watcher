@@ -1,8 +1,8 @@
 import fs from 'fs';
 
 import errorHandler from './errorHandler';
-import getProject from './getProject';
-import getFile from './getFile';
+import getProject from './resolvers/getProject';
+import getFile from './resolvers/getFile';
 import configs from '../configs.json';
 
 export type File = { name: string, exists: boolean }

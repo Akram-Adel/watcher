@@ -1,5 +1,5 @@
-import getProject from '../../src/getProject';
-import configs from '../../configs.json';
+import getProject from '../../../src/resolvers/getProject';
+import configs from '../../../configs.json';
 
 jest.mock('fs', () => ({
   existsSync: jest.fn((i: string) => !i.includes('invalid')),
@@ -21,8 +21,8 @@ describe('getProject', () => {
 
   it('should throw when given --project flag without project configuration', () => {
     jest.resetModules();
-    jest.setMock('../../configs.json', ({ }));
-    const dirResolverReq = require('../../src/getProject').default;
+    jest.setMock('../../../configs.json', ({ }));
+    const dirResolverReq = require('../../../src/resolvers/getProject').default;
 
     process.argv = ['node', 'jest', '--project=Project'];
     expect(() => dirResolverReq()).toThrow();

@@ -2,7 +2,7 @@ import watchman from 'fb-watchman';
 
 import errorHandler from './errorHandler';
 import syncHandler, { File } from './syncHandler';
-import getProject from './getProject';
+import getProject from './resolvers/getProject';
 
 type Obj = { [key: string]: any }
 

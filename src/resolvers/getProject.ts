@@ -1,10 +1,10 @@
 import fs from 'fs';
 
-import errorHandler from './errorHandler';
-import configs from '../configs.json';
+import errorHandler from '../errorHandler';
+import configs from '../../configs.json';
 
 const projectFlag = '--project=';
-export default function getProject(): string {
+export default function getProject(): string | never {
   return (hasInputFlag(projectFlag))
     ? resolveProject()
     : resolveAbsolutePath();
@@ -28,7 +28,7 @@ function resolveProject(): string | never {
   return (isValidDir(dir)) ? dir : errorHandler.throwCoded(1);
 }
 
-function resolveAbsolutePath(): string {
+function resolveAbsolutePath(): string | never {
   const dir: string | undefined = process.argv[2];
   if (!isValidDir(dir)) errorHandler.throwCoded(1);
   return dir;

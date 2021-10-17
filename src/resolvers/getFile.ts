@@ -1,5 +1,5 @@
-import { File } from './syncHandler';
-import configs from '../configs.json';
+import { File } from '../syncHandler';
+import configs from '../../configs.json';
 
 export default function getFile(file: File): File | undefined {
   if (noIgnoreMatchers()) return file;

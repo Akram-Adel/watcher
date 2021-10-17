@@ -12,7 +12,7 @@ jest.mock('fs', () => ({
   readdirSync: jest.fn(() => ['file']),
 }));
 
-jest.mock('../../src/getProject', () => jest.fn(() => 'REMOVED-ACTUAL-project'));
+jest.mock('../../src/resolvers/getProject', () => jest.fn(() => 'REMOVED-ACTUAL-project'));
 
 jest.mock('../../configs.json', () => ({
   ...jest.requireActual('../../configs.json') as any,
