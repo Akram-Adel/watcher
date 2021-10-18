@@ -1,24 +1,17 @@
 # Watcher
-Watcher links two directories together using [Watchman](https://facebook.github.io/watchman/). a change in the first directory gets copied to the second directory \
-This is a custom script for a project I'm working on with plans to make it more of a general solution
+Watcher links a node package and a package user together using [Watchman](https://facebook.github.io/watchman/). a change in the linked package gets automatically copied to the node_module folder of the package user.
+
+This is usefull when symlinks doesn't work and you want to link changed files from the project you are working on to the node_modules of this project in a root project you specify.
 
 ## Install
-First, you need to install [Watchman](https://facebook.github.io/watchman/docs/install.html) if you haven't done this already. \
+First, you need to install [Watchman](https://facebook.github.io/watchman/docs/install.html) if you haven't done this already.
+
 Watcher isn't hosted on the npm registry yet, so you have to clone the repo to a local folder
 ```sh
 git clone https://github.com/Akram-Adel/watcher.git
 cd watcher
 npm i
 ```
-
-Open the `configs.json` file in your favorite editor and change the `root` to point to the `node_modules` folder of your root project like so:
-```json
-{
-  "root": "/Users/akram-adel/Documents/YOUR-ROOT-PROJECT/node_modules/SUB-NAME-IF-NEEDED",
-}
-```
-**Note:** *If your project folder name is different than it's package name (e.g. folder name is `Login` and package name is `Project-Login`), then a `SUB-NAME` of `Project-` has to be added to the `root` configuration for the script to work properly. The script appends the project name (e.g. `Login`) to the end of the `root` string you provided. \
-In the future, we will change the script to read the project name directly from the `package.json` file to avoid this hassle*
 
 Build the script then add it to your global packages
 ```sh
@@ -27,35 +20,37 @@ sudo npm i -g .
 ```
 
 Now you are good to go. \
-You can use the script from anywhere to link the project you are working on to the `node_module` of that project in the `root` app directory like so:
+You can use the script from anywhere to link the `project` directory you are working on to the `node_module` of that project in the `root` directory like so:
 ```sh
-# watcher absolute/path/of/your/project, e.g.
-watcher ~/Documents/Project-Login
+# watcher --project=absolute/path/to/your/project --root=absolute/path/to/your/root
+watcher --project=~/Documents/Login --root=~/Documents/Main
 ```
 
-## Project configurations
-It is tedious to have to specify the full path of the project you are working on every time you use the script. luckily, there is a property you can add to the `configs.json` that will make it a little bit easier, that is the `project` property. \
-If you have all the repos in the same location like so:
-```
-|- Documents
-  |- Project-Main
-  |- Project-OnBoarding
-  |- Project-Login
-  |- ...
-```
-Then you can specify a `project` property in the `configs.json` that points to the location of the repos minus the project name like so:
+## Aliase configurations
+It is tedious to have to specify the full path of the `project`/`root` you are working on every time you use the script. luckily, there is an `aliase` property you can add to the `configs.json` to keep a short *aliase* for the full path
 ```json
 {
-  "project": "/Users/akram-adel/Documents/Project-",
+  "aliase": {
+    "login": "/Users/akram-adel/Documents/Login",
+    "main": "/Users/akram-adel/Documents/Main"
+  }
 }
 ```
-Now you can use the script without specifying the full path of the project, you just have to give a `--project` flag and the name of the project you are working on and the script will take care of the rest. \
-*Under the hood, the script takes the name of the project you provided and appends it to the `project` string. So you can put any value you want in the `project` configuration as long as it will correctly resolve to your project*
+Now you can run the script without specifying the full path, just use the aliase name instead:
 ```sh
-# watcher --project=nameOfTheProject
+watcher --project=login --root=main
+```
+
+## Default-Root configurations
+In some cases, you might be working on multiple projects that a single `root` is using, in this case, you can use `defaultRoot` for this. Just add it to your config file and the script will default to it when you don't specify a `--root` input
+```json
+{
+  "defaultRoot": "/Users/akram-adel/Documents/Main"
+}
+```
+```sh
 watcher --project=login
 ```
-**Note:** *In the future, we will change the script to include name aliases of all the projects of interest so that you are not limited to having the repos in the same directory*
 
 ## Ignoring files
 In some cases, you might be working in a file or directory and you don't want changes in those files to reflect in the root project. An example of that might be the `__Tests__` directory. \
@@ -80,8 +75,3 @@ After running the script and linking the project you are working on with the roo
 ### Creating a pull request
 - Please adhere to the style and formatting of the code
 - Write tests for new functionality
-
-## TODO
-- [x] Read projectName from project's package.json file
-- [x] Replace `root` and `project` with an `aliase` object
-- [x] Change usage to `watcher --project=<projectName> --root=<rootName>` with `defaultRoot` accepted in the config file
