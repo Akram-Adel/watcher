@@ -36,6 +36,10 @@ It is tedious to have to specify the full path of the `project`/`root` you are w
   }
 }
 ```
+Then you will need to update your package for changes to take effect
+```sh
+npm run update
+```
 Now you can run the script without specifying the full path, just use the aliase name instead:
 ```sh
 watcher --project=login --root=main
@@ -48,6 +52,11 @@ In some cases, you might be working on multiple projects that a single `root` is
   "defaultRoot": "/Users/akram-adel/Documents/Main"
 }
 ```
+Then you will need to update your package for changes to take effect
+```sh
+npm run update
+```
+Now usage simply becomes:
 ```sh
 watcher --project=login
 ```
@@ -59,6 +68,10 @@ In some cases, you might be working in a file or directory and you don't want ch
 {
   "fileIgnorePattern": ["__Tests__"],
 }
+```
+Then you will need to update your package for changes to take effect
+```sh
+npm run update
 ```
 
 ## Debugging
