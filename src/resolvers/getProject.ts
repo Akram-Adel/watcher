@@ -2,38 +2,18 @@ import fs from 'fs';
 
 import errorHandler from '../errorHandler';
 import configs from '../../configs.json';
+import { Configs, getInputWithFlag } from './utils';
 
-const projectFlag = '--project=';
 export default function getProject(): string | never {
-  return (hasInputFlag(projectFlag))
-    ? resolveProject()
-    : resolveAbsolutePath();
+  const input = getInputWithFlag('project');
+  const { aliase } = configs as Configs;
+
+  if (!input) return errorHandler.throwCoded(1);
+  if (aliase?.[input]) return resolveProject(aliase![input]);
+  return resolveProject(input);
 }
 
-function hasInputFlag(flag: string): boolean {
-  for (const input of process.argv) {
-    if (input.includes(flag)) return true;
-  }
-  return false;
-}
-
-function resolveProject(): string | never {
-  if (!configs.project) errorHandler.throwCoded(2);
-  let dir = configs.project;
-
-  for (const input of process.argv) {
-    if (input.includes(projectFlag)) dir += input.slice(projectFlag.length);
-  }
-
-  return (isValidDir(dir)) ? dir : errorHandler.throwCoded(1);
-}
-
-function resolveAbsolutePath(): string | never {
-  const dir: string | undefined = process.argv[2];
-  if (!isValidDir(dir)) errorHandler.throwCoded(1);
-  return dir;
-}
-
-function isValidDir(dir: string | undefined): dir is string {
-  return (!!dir && fs.existsSync(dir));
+function resolveProject(input: string): string | never {
+  if (!fs.existsSync(input)) return errorHandler.throwCoded(1);
+  return input;
 }

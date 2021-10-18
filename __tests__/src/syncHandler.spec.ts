@@ -14,10 +14,7 @@ jest.mock('fs', () => ({
 jest.mock('../../src/resolvers/getProject', () => jest.fn(() => 'project'));
 jest.mock('../../src/resolvers/getRoot', () => jest.fn(() => 'root'));
 
-jest.mock('../../configs.json', () => ({
-  ...jest.requireActual('../../configs.json') as any,
-  fileIgnorePattern: ['__tests__'],
-}));
+jest.mock('../../configs.json', () => ({ fileIgnorePattern: ['__tests__'] }));
 
 function getPath(type: 'src' | 'dist', name?: string): string {
   let path = (type === 'src') ? 'project' : 'root';

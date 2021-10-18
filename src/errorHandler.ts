@@ -16,6 +16,8 @@ class ErrorHandler {
         throw new Error('invalid project configurations');
       case 3:
         throw new Error('no/invalid project package.json');
+      case 4:
+        throw new Error('invalid requested flag');
 
       case 0:
       default:

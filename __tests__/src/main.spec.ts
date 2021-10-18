@@ -21,15 +21,16 @@ jest.mock('fb-watchman', () => ({
 
 jest.mock('fs', () => ({ existsSync: jest.fn(() => true) }));
 jest.mock('../../src/syncHandler', () => ({ syncFile: jest.fn() }));
+jest.mock('../../src/resolvers/getProject', () => jest.fn(() => 'valid'));
 
-beforeAll(() => { process.argv = ['node', 'jest', 'valid']; });
+beforeAll(() => { process.argv = ['node', 'jest']; });
 
 describe('index', () => {
-  it('should throw error when watchman capabilities has an error', () => {
+  it('should throw when watchman capabilities has an error', () => {
     (client.capabilityCheck as jest.Mock)
       .mockImplementationOnce((_, fn) => fn(new Error('capabilityCheck error')));
 
-    expect(() => main()).toThrow(/capabilityCheck error/);
+    expect(() => main()).toThrow('capabilityCheck error');
   });
 
   it('should issue watch command when a directory is provided', () => {
@@ -39,11 +40,11 @@ describe('index', () => {
     expect(client.command).toHaveBeenCalledWith(...watchCommand);
   });
 
-  it('should throw error when watch command fails', () => {
+  it('should throw when watch command fails', () => {
     (client.command as jest.Mock)
       .mockImplementationOnce((_, fn) => fn(new Error('command error')));
 
-    expect(() => main()).toThrow(/command error/);
+    expect(() => main()).toThrow('command error');
   });
 
   it('can create clocked subscription object', () => {
