@@ -1,16 +1,18 @@
 import fs from 'fs';
 
 import configs from '../../configs.json';
+import { Configs } from '../../configs.d';
+
 import errorHandler from '../errorHandler';
 import getProject from './getProject';
-import { Configs, getInputWithFlag } from './utils';
+import { getInputWithFlag } from './utils';
 
 export default function getRoot(): string | never {
   const input = getInputWithFlag('root');
   const { aliase } = configs as Configs;
 
-  if (!configs.defaultRoot && !input) return errorHandler.throwCoded(2);
-  if (!input) return resolveRootWithProject(configs.defaultRoot);
+  if (!(configs as Configs).defaultRoot && !input) return errorHandler.throwCoded(2);
+  if (!input) return resolveRootWithProject((configs as Configs).defaultRoot!);
   if (aliase?.[input]) return resolveRootWithProject(aliase![input]);
   return resolveRootWithProject(input);
 }

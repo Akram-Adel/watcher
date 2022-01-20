@@ -1,9 +1,6 @@
 import errorHandler from '../errorHandler';
 
-export type Configs = {
-  aliase?: {[key: string]: string}
-}
-
+// eslint-disable-next-line import/prefer-default-export
 export function getInputWithFlag(flag: string): string | undefined | never {
   if (flag.includes(' ')) errorHandler.throwCoded(4);
 

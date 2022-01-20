@@ -1,8 +1,10 @@
 import fs from 'fs';
 
-import errorHandler from '../errorHandler';
 import configs from '../../configs.json';
-import { Configs, getInputWithFlag } from './utils';
+import { Configs } from '../../configs.d';
+
+import errorHandler from '../errorHandler';
+import { getInputWithFlag } from './utils';
 
 export default function getProject(): string | never {
   const input = getInputWithFlag('project');

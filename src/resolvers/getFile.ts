@@ -1,10 +1,12 @@
-import { File } from '../syncHandler';
 import configs from '../../configs.json';
+import { Configs } from '../../configs.d';
+
+import { File } from '../syncHandler';
 
 export default function getFile(file: File): File | undefined {
   if (noIgnoreMatchers()) return file;
 
-  for (const pattern of configs.fileIgnorePattern) {
+  for (const pattern of (configs as Configs).fileIgnorePattern!) {
     if (new RegExp(pattern).test(file.name)) return undefined;
   }
 
@@ -12,5 +14,6 @@ export default function getFile(file: File): File | undefined {
 }
 
 function noIgnoreMatchers(): boolean {
-  return !configs.fileIgnorePattern || configs.fileIgnorePattern.length === 0;
+  return !(configs as Configs).fileIgnorePattern
+    || (configs as Configs).fileIgnorePattern!.length === 0;
 }
