@@ -6,7 +6,7 @@ export function getInputWithFlag(flag: string): string | undefined | never {
 
   const fullFlag = `--${flag}=`;
   for (const input of process.argv) {
-    if (input.includes(fullFlag)) return input.substr(fullFlag.length);
+    if (input.includes(fullFlag)) return input.substring(fullFlag.length);
   }
 
   return undefined;
