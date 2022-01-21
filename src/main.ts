@@ -1,16 +1,18 @@
 import watchman from 'fb-watchman';
 
-import syncHandler, { File } from './syncHandler';
+import SyncHandler, { File } from './syncHandler';
 import getProject from './resolvers/getProject';
 
 export const client = new watchman.Client();
 export const subscriptionName = 'watcher-subscription';
+let syncHandler: SyncHandler;
 
 export default function main(): void {
   const capabilityChecks = ['relative_root', 'suffix-set'];
   client.capabilityCheck({ optional: [], required: capabilityChecks }, (error) => {
     throwIf(error);
 
+    syncHandler = new SyncHandler();
     client.command(['watch-project', getProject()], handleWatchCommand);
   });
 }
@@ -67,10 +69,11 @@ function throwIf(error?: Error | null): void | never {
   if (error) throw error;
 }
 
+/* istanbul ignore next */
 function mainLog(type: 'SUCESS' | 'WARNING', ...log: Array<any>) {
-  /* istanbul ignore next */
+  if (process.env.NODE_ENV === 'test') return;
+
   const decoration = (type === 'SUCESS') ? '\x1b[42m\x1b[30m'
     : '\x1b[45m\x1b[30m';
-
   console.log(decoration, type, '\x1b[0m', ...log);
 }

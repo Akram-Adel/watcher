@@ -76,19 +76,21 @@ class SyncHandler {
     return `${this.to}/${fileName}`;
   }
 
-  private colorfulLog(color: LogColors, fileName: string, process = 'sync'): void {
+  /* istanbul ignore next */
+  private colorfulLog(color: LogColors, fileName: string, operation = 'sync'): void {
+    if (process.env.NODE_ENV === 'test') return;
+
     const colorNum = (color === 'Green') ? 2
       : (color === 'Yellow') ? 3
         : (color === 'Red') ? 1
           : 5;
 
     console.log(`\x1b[3${colorNum}m`,
-      process, 'changes from', fileName,
+      operation, 'changes from', fileName,
       '\x1b[0m');
   }
 
   private distFileExist = (file: File): boolean => fs.existsSync(this.getDistFile(file.name))
 }
 
-const syncHandler = new SyncHandler();
-export default syncHandler;
+export default SyncHandler;

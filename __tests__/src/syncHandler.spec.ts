@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-import syncHandler from '../../src/syncHandler';
+import SyncHandler from '../../src/syncHandler';
 
 jest.mock('fs', () => ({
   copyFileSync: jest.fn(),
@@ -24,11 +24,15 @@ function getPath(type: 'src' | 'dist', name?: string): string {
 
 describe('SyncHandler', () => {
   it('should set from/to roots correctly', () => {
+    const syncHandler = new SyncHandler();
+
     expect(syncHandler.from).toBe('project');
     expect(syncHandler.to).toBe('root');
   });
 
   it('should ignore tests files', () => {
+    const syncHandler = new SyncHandler();
+
     syncHandler.syncFile({ name: '__tests__/name.js', exists: true });
 
     expect(fs.copyFileSync).not.toHaveBeenCalled();
@@ -37,6 +41,7 @@ describe('SyncHandler', () => {
   });
 
   it('should copy existing/new file', () => {
+    const syncHandler = new SyncHandler();
     const fileName = 'dir/file.js';
 
     syncHandler.syncFile({ name: fileName, exists: true });
@@ -45,6 +50,7 @@ describe('SyncHandler', () => {
   });
 
   it('should create new directory for new files in new directories', () => {
+    const syncHandler = new SyncHandler();
     (fs.existsSync as jest.Mock)
       .mockImplementationOnce(() => false)
       .mockImplementationOnce(() => false);
@@ -53,21 +59,15 @@ describe('SyncHandler', () => {
     expect(fs.mkdirSync).toHaveBeenCalledWith(getPath('dist', 'dir'), expect.anything());
   });
 
-  it('should log sync operations', () => {
-    const mockConsole = jest.spyOn(global.console, 'log');
-
-    syncHandler.syncFile({ name: 'dir/file.js', exists: true });
-    expect(mockConsole).toHaveBeenCalled();
-
-    mockConsole.mockRestore();
-  });
-
   it('should delete removed file', () => {
+    const syncHandler = new SyncHandler();
+
     syncHandler.syncFile({ name: 'dir/file.js', exists: false });
     expect(fs.rmSync).toHaveBeenCalledWith(getPath('dist', 'dir/file.js'));
   });
 
   it('should recusively delete file direcotries if they are empty', () => {
+    const syncHandler = new SyncHandler();
     (fs.readdirSync as jest.Mock)
       .mockImplementationOnce(() => [])
       .mockImplementationOnce(() => []);

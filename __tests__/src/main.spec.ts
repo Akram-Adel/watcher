@@ -1,7 +1,7 @@
 import { doneCallback } from 'fb-watchman';
 
 import main, { client, subscriptionName, getSubscriptionObj } from '../../src/main';
-import syncHandler from '../../src/syncHandler';
+import SyncHandler from '../../src/syncHandler';
 
 const mockOnSubscription = { subscription: subscriptionName, files: [{ name: 'any' }] };
 const mockWatchResponse = { watch: 'valid', relative_path: 'root' };
@@ -20,7 +20,8 @@ jest.mock('fb-watchman', () => ({
 }));
 
 jest.mock('fs', () => ({ existsSync: jest.fn(() => true) }));
-jest.mock('../../src/syncHandler', () => ({ syncFile: jest.fn() }));
+
+jest.mock('../../src/syncHandler');
 jest.mock('../../src/resolvers/getProject', () => jest.fn(() => 'valid'));
 
 beforeAll(() => { process.argv = ['node', 'jest']; });
@@ -33,10 +34,11 @@ describe('main', () => {
     expect(() => main()).toThrow('capabilityCheck error');
   });
 
-  it('should issue watch command when a directory is provided', () => {
+  it('should create SyncHandler and issue watch command when a directory is provided', () => {
     const watchCommand = [['watch-project', 'valid'], expect.anything()];
 
     main();
+    expect(SyncHandler).toHaveBeenCalled();
     expect(client.command).toHaveBeenCalledWith(...watchCommand);
   });
 
@@ -83,9 +85,17 @@ describe('main', () => {
       .mockImplementationOnce((_, fn) => fn({ subscription: 'any' }));
 
     main();
-    expect(syncHandler.syncFile).not.toHaveBeenCalled();
+    expect(
+      ((SyncHandler as jest.Mock)
+        .mock.instances[0] as SyncHandler)
+        .syncFile,
+    ).not.toHaveBeenCalled();
 
     main();
-    expect(syncHandler.syncFile).toHaveBeenCalledWith(mockOnSubscription.files[0]);
+    expect(
+      ((SyncHandler as jest.Mock)
+        .mock.instances[1] as SyncHandler)
+        .syncFile,
+    ).toHaveBeenCalledWith(mockOnSubscription.files[0]);
   });
 });
