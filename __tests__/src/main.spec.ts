@@ -1,9 +1,9 @@
 import { doneCallback } from 'fb-watchman';
 
 import main, { client, subscriptionName, getSubscriptionObj } from '../../src/main';
-import SyncHandler from '../../src/syncHandler';
+import { SingleSyncHandler, LinkedSyncHandler } from '../../src/syncHandler';
 
-const mockOnSubscription = { subscription: subscriptionName, files: [{ name: 'any' }] };
+const mockOnSubscription = { subscription: subscriptionName, files: [{ name: 'any' }], root: 'subRoot' };
 const mockWatchResponse = { watch: 'valid', relative_path: 'root' };
 const mockClockResponse = { clock: 100 };
 
@@ -22,9 +22,10 @@ jest.mock('fb-watchman', () => ({
 jest.mock('fs', () => ({ existsSync: jest.fn(() => true) }));
 
 jest.mock('../../src/syncHandler');
-jest.mock('../../src/resolvers/getProject', () => jest.fn(() => 'valid'));
+jest.mock('../../src/resolvers/getProject', () => jest.fn(() => 'project'));
+jest.mock('../../src/resolvers/getLinkedProjects', () => jest.fn(() => ['project1', 'project2']));
 
-beforeAll(() => { process.argv = ['node', 'jest']; });
+beforeEach(() => { process.argv = ['node', 'jest']; });
 
 describe('main', () => {
   it('should throw when watchman capabilities has an error', () => {
@@ -34,12 +35,25 @@ describe('main', () => {
     expect(() => main()).toThrow('capabilityCheck error');
   });
 
-  it('should create SyncHandler and issue watch command when a directory is provided', () => {
-    const watchCommand = [['watch-project', 'valid'], expect.anything()];
+  it('should create SingleSyncHandler and issue watch command when a directory is provided', () => {
+    main();
+    expect(SingleSyncHandler).toHaveBeenCalled();
+    expect(client.command).toHaveBeenCalledWith(['watch-project', 'project'], expect.anything());
+  });
+
+  it('should create LinkedSyncHandler when --link flag is provided', () => {
+    process.argv = ['node', 'jest', '--link=link'];
 
     main();
-    expect(SyncHandler).toHaveBeenCalled();
-    expect(client.command).toHaveBeenCalledWith(...watchCommand);
+    expect(LinkedSyncHandler).toHaveBeenCalled();
+  });
+
+  it('should issue multiple watch commands for each project in the provided link', () => {
+    process.argv = ['node', 'jest', '--link=link'];
+
+    main();
+    expect(client.command).toHaveBeenCalledWith(['watch-project', 'project1'], expect.anything());
+    expect(client.command).toHaveBeenCalledWith(['watch-project', 'project2'], expect.anything());
   });
 
   it('should throw when watch command fails', () => {
@@ -80,22 +94,30 @@ describe('main', () => {
     expect(client.on).toHaveBeenCalledWith('subscription', expect.anything());
   });
 
+  it('should subscribe only once to client events for linked projects', () => {
+    process.argv = ['node', 'jest', '--link=link'];
+
+    main();
+    expect(client.on).toHaveBeenCalledTimes(1);
+    expect(client.on).toHaveBeenCalledWith('subscription', expect.anything());
+  });
+
   it('should not respond to any subscriptions other than issued ones', () => {
     (client.on as jest.Mock)
       .mockImplementationOnce((_, fn) => fn({ subscription: 'any' }));
 
     main();
     expect(
-      ((SyncHandler as jest.Mock)
-        .mock.instances[0] as SyncHandler)
+      ((SingleSyncHandler as jest.Mock)
+        .mock.instances[0] as SingleSyncHandler)
         .syncFile,
     ).not.toHaveBeenCalled();
 
     main();
     expect(
-      ((SyncHandler as jest.Mock)
-        .mock.instances[1] as SyncHandler)
+      ((SingleSyncHandler as jest.Mock)
+        .mock.instances[1] as SingleSyncHandler)
         .syncFile,
-    ).toHaveBeenCalledWith(mockOnSubscription.files[0]);
+    ).toHaveBeenCalledWith(mockOnSubscription.files[0], 'subRoot');
   });
 });

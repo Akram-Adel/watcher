@@ -1,5 +1,3 @@
-import fs from 'fs';
-
 import getProject from '../../../src/resolvers/getProject';
 import getRoot from '../../../src/resolvers/getRoot';
 
@@ -75,19 +73,5 @@ describe('getRoot', () => {
   it('should throw when cant get the project', () => {
     (getProject as jest.Mock).mockImplementationOnce(() => undefined);
     expect(() => getRoot()).toThrow(/Internal script error/);
-  });
-
-  it('should throw when the project doesnt have package.json file', () => {
-    (fs.existsSync as jest.Mock)
-      .mockImplementationOnce((i: string) => !i.includes('invalid'))
-      .mockImplementationOnce((i: string) => !i.includes('.json'));
-
-    expect(() => getRoot()).toThrow(/Project does not have package.json file/);
-  });
-
-  it('should throw when the project package.json doesnt have name property', () => {
-    jest.resetModules();
-    jest.setMock('project/package.json', ({ }));
-    expect(() => getRoot()).toThrow(/Project package.json does not have name value/);
   });
 });

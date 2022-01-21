@@ -1,4 +1,15 @@
-// eslint-disable-next-line import/prefer-default-export
+import fs from 'fs';
+
+export function resolveRootWithProject(root: string, project: string): string {
+  if (!fs.existsSync(`${project}/package.json`)) throw new Error(`No package.json found in ${project}`);
+
+  // eslint-disable-next-line @typescript-eslint/no-var-requires, import/no-dynamic-require, global-require
+  const packageConfig = require(`${project}/package.json`);
+  if (!packageConfig.name) throw new Error(`Project package.json does not have name value, check ${project}`);
+
+  return `${root}/node_modules/${packageConfig.name}`;
+}
+
 export function getInputWithFlag(flag: string): string | undefined | never {
   if (flag.includes(' ')) throw new Error(`Invalid request flag: ${flag}`);
 

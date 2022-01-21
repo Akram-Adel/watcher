@@ -1,19 +1,39 @@
 import watchman from 'fb-watchman';
 
-import SyncHandler, { File } from './syncHandler';
+import { File, SyncHandlerBase, SingleSyncHandler, LinkedSyncHandler } from './syncHandler';
+import getLinkedProjects from './resolvers/getLinkedProjects';
 import getProject from './resolvers/getProject';
+import { getInputWithFlag } from './resolvers/utils';
 
 export const client = new watchman.Client();
 export const subscriptionName = 'watcher-subscription';
-let syncHandler: SyncHandler;
+let syncHandler: SyncHandlerBase;
 
 export default function main(): void {
   const capabilityChecks = ['relative_root', 'suffix-set'];
   client.capabilityCheck({ optional: [], required: capabilityChecks }, (error) => {
     throwIf(error);
 
-    syncHandler = new SyncHandler();
-    client.command(['watch-project', getProject()], handleWatchCommand);
+    if (getInputWithFlag('link')) {
+      syncHandler = new LinkedSyncHandler();
+      getLinkedProjects().forEach((project) => issueWatchCommand(project));
+    } else {
+      syncHandler = new SingleSyncHandler();
+      issueWatchCommand();
+    }
+
+    subscribeToWatchClient();
+  });
+}
+
+function issueWatchCommand(project: string = getProject()) {
+  client.command(['watch-project', project], handleWatchCommand);
+}
+
+function subscribeToWatchClient() {
+  client.on('subscription', (resp) => {
+    if (resp.subscription !== subscriptionName) return;
+    resp.files.forEach((file: File) => syncHandler.syncFile(file, resp.root));
   });
 }
 
@@ -25,7 +45,6 @@ function handleWatchCommand(error?: Error | null, resp?: any) {
   mainLog('SUCESS', 'watch established on', resp.watch, 'relative_path', resp.relative_path);
 
   issueClockedSubscription(resp);
-  subscribeToIssuedSubscription();
 }
 
 function issueClockedSubscription(resp?: any) {
@@ -45,13 +64,6 @@ function issueClockedSubscription(resp?: any) {
       /* istanbul ignore next */
       mainLog('SUCESS', 'subscription', subResponse?.subscribe, 'established');
     });
-  });
-}
-
-function subscribeToIssuedSubscription() {
-  client.on('subscription', (resp) => {
-    if (resp.subscription !== subscriptionName) return;
-    resp.files.forEach((file: File) => syncHandler.syncFile(file));
   });
 }
 

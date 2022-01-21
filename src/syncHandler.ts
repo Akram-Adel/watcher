@@ -1,25 +1,21 @@
 import fs from 'fs';
 
-import getProject from './resolvers/getProject';
 import getFile from './resolvers/getFile';
+import getLinkedRoot from './resolvers/getLinkedRoot';
+import getProject from './resolvers/getProject';
 import getRoot from './resolvers/getRoot';
 
 export type File = { name: string, exists: boolean }
-type LogColors = 'Green' | 'Yellow' | 'Red' | 'Magenta';
+export type LogColors = 'Green' | 'Yellow' | 'Red' | 'Magenta';
 
-class SyncHandler {
+export abstract class SyncHandlerBase {
   get from(): string | undefined { return this.fromRoot; }
-  private fromRoot?: string
+  protected fromRoot?: string
 
   get to(): string | undefined { return this.toRoot; }
-  private toRoot?: string
+  protected toRoot?: string
 
-  constructor() {
-    this.fromRoot = getProject();
-    this.toRoot = getRoot();
-  }
-
-  syncFile(subscriptionFile: File): void {
+  public syncFile(subscriptionFile: File, _: string): void {
     const file = getFile(subscriptionFile);
 
     if (!file) this.ignoreFile(subscriptionFile);
@@ -28,11 +24,11 @@ class SyncHandler {
     else this.copyFile(file.name, 'Yellow');
   }
 
-  private ignoreFile(subscriptionFile: File) {
+  protected ignoreFile(subscriptionFile: File): void {
     this.colorfulLog('Magenta', subscriptionFile.name, 'ignore');
   }
 
-  private handleFileCreation(fileName: string) {
+  protected handleFileCreation(fileName: string): void {
     const distDir = this.getDistDir(fileName);
 
     /* istanbul ignore else */
@@ -41,7 +37,7 @@ class SyncHandler {
     this.copyFile(fileName, 'Green');
   }
 
-  private handleFileDeletion(fileName: string) {
+  protected handleFileDeletion(fileName: string): void {
     fs.rmSync(this.getDistFile(fileName));
 
     this.deleteDir(this.getDistDir(fileName));
@@ -49,7 +45,7 @@ class SyncHandler {
     this.colorfulLog('Red', fileName);
   }
 
-  private copyFile(fileName: string, color: LogColors) {
+  protected copyFile(fileName: string, color: LogColors): void {
     fs.copyFileSync(this.getSrcFile(fileName), this.getDistFile(fileName));
 
     this.colorfulLog(color, fileName);
@@ -77,7 +73,7 @@ class SyncHandler {
   }
 
   /* istanbul ignore next */
-  private colorfulLog(color: LogColors, fileName: string, operation = 'sync'): void {
+  private colorfulLog(color: LogColors, fileName: string, operation = 'sync') {
     if (process.env.NODE_ENV === 'test') return;
 
     const colorNum = (color === 'Green') ? 2
@@ -90,7 +86,22 @@ class SyncHandler {
       '\x1b[0m');
   }
 
-  private distFileExist = (file: File): boolean => fs.existsSync(this.getDistFile(file.name))
+  protected distFileExist = (file: File): boolean => fs.existsSync(this.getDistFile(file.name))
 }
 
-export default SyncHandler;
+export class SingleSyncHandler extends SyncHandlerBase {
+  constructor() {
+    super();
+    this.fromRoot = getProject();
+    this.toRoot = getRoot();
+  }
+}
+
+export class LinkedSyncHandler extends SyncHandlerBase {
+  get to(): string | undefined { return getLinkedRoot(this.from); }
+
+  syncFile(subscriptionFile: File, root: string): void {
+    this.fromRoot = root;
+    super.syncFile(subscriptionFile, root);
+  }
+}
