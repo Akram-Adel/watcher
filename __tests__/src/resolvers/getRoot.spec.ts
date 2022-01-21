@@ -20,7 +20,7 @@ describe('getRoot', () => {
     jest.setMock('../../../configs.json', ({ }));
     const getRootReq = require('../../../src/resolvers/getRoot').default;
 
-    expect(() => getRootReq()).toThrow('invalid project configurations');
+    expect(() => getRootReq()).toThrow(/No root provided/);
   });
 
   it('should resolve root when provided defaultRoot and no root input', () => {
@@ -32,7 +32,7 @@ describe('getRoot', () => {
     jest.setMock('../../../configs.json', ({ defaultRoot: 'default/invalid' }));
     const getRootReq = require('../../../src/resolvers/getRoot').default;
 
-    expect(() => getRootReq()).toThrow('no/invalid directory provided');
+    expect(() => getRootReq()).toThrow(/Root does not exist/);
   });
 
   it('should resolve root when no aliases in configuration and input dir is valid', () => {
@@ -50,7 +50,7 @@ describe('getRoot', () => {
     const getRootReq = require('../../../src/resolvers/getRoot').default;
 
     process.argv = ['node', 'jest', '--root=invalid'];
-    expect(() => getRootReq()).toThrow('no/invalid directory provided');
+    expect(() => getRootReq()).toThrow(/Root does not exist/);
   });
 
   it('should resolve aliase input', () => {
@@ -64,7 +64,7 @@ describe('getRoot', () => {
     const getRootReq = require('../../../src/resolvers/getRoot').default;
 
     process.argv = ['node', 'jest', '--root=aliase'];
-    expect(() => getRootReq()).toThrow('no/invalid directory provided');
+    expect(() => getRootReq()).toThrow(/Root does not exist/);
   });
 
   it('should resolve root when aliases is provided but doesnt match input', () => {
@@ -74,7 +74,7 @@ describe('getRoot', () => {
 
   it('should throw when cant get the project', () => {
     (getProject as jest.Mock).mockImplementationOnce(() => undefined);
-    expect(() => getRoot()).toThrow('internal script error');
+    expect(() => getRoot()).toThrow(/Internal script error/);
   });
 
   it('should throw when the project doesnt have package.json file', () => {
@@ -82,12 +82,12 @@ describe('getRoot', () => {
       .mockImplementationOnce((i: string) => !i.includes('invalid'))
       .mockImplementationOnce((i: string) => !i.includes('.json'));
 
-    expect(() => getRoot()).toThrow('no/invalid project package.json');
+    expect(() => getRoot()).toThrow(/Project does not have package.json file/);
   });
 
   it('should throw when the project package.json doesnt have name property', () => {
     jest.resetModules();
     jest.setMock('project/package.json', ({ }));
-    expect(() => getRoot()).toThrow('no/invalid project package.json');
+    expect(() => getRoot()).toThrow(/Project package.json does not have name value/);
   });
 });

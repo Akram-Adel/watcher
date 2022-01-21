@@ -2,7 +2,7 @@ import { getInputWithFlag } from '../../../src/resolvers/utils';
 
 describe('utils.getInputFlag', () => {
   it('should throw when flag is not of correct shape', () => {
-    expect(() => getInputWithFlag('not correct')).toThrow('invalid requested flag');
+    expect(() => getInputWithFlag('not correct')).toThrow(/Invalid request flag/);
   });
 
   it('should return undefined when flag doesnt exist', () => {

@@ -3,31 +3,31 @@ import fs from 'fs';
 import configs from '../../configs.json';
 import { Configs } from '../../configs.d';
 
-import errorHandler from '../errorHandler';
 import getProject from './getProject';
 import { getInputWithFlag } from './utils';
 
 export default function getRoot(): string | never {
   const input = getInputWithFlag('root');
-  const { aliase } = configs as Configs;
+  const { aliase, defaultRoot } = configs as Configs;
 
-  if (!(configs as Configs).defaultRoot && !input) return errorHandler.throwCoded(2);
-  if (!input) return resolveRootWithProject((configs as Configs).defaultRoot!);
+  if (!defaultRoot && !input) throw new Error('No root provided, did you forget to add a --root= flag?');
+
+  if (!input) return resolveRootWithProject(defaultRoot!);
   if (aliase?.[input]) return resolveRootWithProject(aliase![input]);
   return resolveRootWithProject(input);
 }
 
-function resolveRootWithProject(input: string): string {
-  if (!fs.existsSync(input)) return errorHandler.throwCoded(1);
+function resolveRootWithProject(root: string): string {
+  if (!fs.existsSync(root)) throw new Error('Root does not exist, make sure that provided path is valid');
 
   const project = getProject();
-  if (!project) errorHandler.throwCoded(0);
+  if (!project) throw new Error('Internal script error');
 
-  if (!fs.existsSync(`${project}/package.json`)) errorHandler.throwCoded(3);
+  if (!fs.existsSync(`${project}/package.json`)) throw new Error('Project does not have package.json file');
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires, import/no-dynamic-require, global-require
   const packageConfig = require(`${project}/package.json`);
-  if (!packageConfig.name) errorHandler.throwCoded(3);
+  if (!packageConfig.name) throw new Error('Project package.json does not have name value');
 
-  return `${input}/node_modules/${packageConfig.name}`;
+  return `${root}/node_modules/${packageConfig.name}`;
 }

@@ -9,10 +9,10 @@ jest.mock('../../../configs.json', () => ({ aliase: { aliase: 'resolved/valid' }
 describe('getProject', () => {
   it('should throw when no/invalid project input', () => {
     process.argv = ['node', 'jest'];
-    expect(() => getProject()).toThrow('no/invalid directory provided');
+    expect(() => getProject()).toThrow(/No project provided/);
 
     process.argv = ['node', 'jest', 'invalid'];
-    expect(() => getProject()).toThrow('no/invalid directory provided');
+    expect(() => getProject()).toThrow(/No project provided/);
   });
 
   it('should return input dir when no aliases in configuration and input dir is valid', () => {
@@ -30,7 +30,7 @@ describe('getProject', () => {
     const getProjectReq = require('../../../src/resolvers/getProject').default;
 
     process.argv = ['node', 'jest', '--project=invalid'];
-    expect(() => getProjectReq()).toThrow('no/invalid directory provided');
+    expect(() => getProjectReq()).toThrow(/Project does not exist/);
   });
 
   it('should resolve aliase inputs', () => {
@@ -44,7 +44,7 @@ describe('getProject', () => {
     const getProjectReq = require('../../../src/resolvers/getProject').default;
 
     process.argv = ['node', 'jest', '--project=aliase'];
-    expect(() => getProjectReq()).toThrow('no/invalid directory provided');
+    expect(() => getProjectReq()).toThrow(/Project does not exist/);
   });
 
   it('should resolve root when aliases is provided but doesnt match input', () => {

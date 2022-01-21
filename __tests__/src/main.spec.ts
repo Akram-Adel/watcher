@@ -25,7 +25,7 @@ jest.mock('../../src/resolvers/getProject', () => jest.fn(() => 'valid'));
 
 beforeAll(() => { process.argv = ['node', 'jest']; });
 
-describe('index', () => {
+describe('main', () => {
   it('should throw when watchman capabilities has an error', () => {
     (client.capabilityCheck as jest.Mock)
       .mockImplementationOnce((_, fn) => fn(new Error('capabilityCheck error')));
