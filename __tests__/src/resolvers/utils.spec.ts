@@ -30,6 +30,14 @@ describe('utils.resolveRootWithProject', () => {
 
     expect(resolveRootWithProject('root', 'project')).toBe('root/node_modules/package.name');
   });
+
+  it('should not required the same project package.json twice', () => {
+    jest.resetModules();
+    jest.doMock('project/package.json', () => ({ }));
+
+    expect(resolveRootWithProject('root', 'project')).toBe('root/node_modules/package.name');
+    expect(fs.existsSync).not.toHaveBeenCalled();
+  });
 });
 
 describe('utils.getInputFlag', () => {
@@ -41,16 +49,21 @@ describe('utils.getInputFlag', () => {
     expect(getInputWithFlag('nonExistent')).toBe(undefined);
   });
 
-  it('should return input when flag exists', () => {
-    process.argv = ['node', 'jest', '--existent=flag'];
-    expect(getInputWithFlag('existent')).toBe('flag');
-  });
-
   it('should return undefined when input not in correct shape', () => {
     process.argv = ['node', 'jest', '--existentflag'];
     expect(getInputWithFlag('existent')).toBe(undefined);
 
     process.argv = ['node', 'jest', 'existent=flag'];
     expect(getInputWithFlag('existent')).toBe(undefined);
+  });
+
+  it('should return input when flag exists', () => {
+    process.argv = ['node', 'jest', '--existent=flag'];
+    expect(getInputWithFlag('existent')).toBe('flag');
+  });
+
+  it('should not search input for the same flag twice', () => {
+    process.argv = ['node', 'jest'];
+    expect(getInputWithFlag('existent')).toBe('flag');
   });
 });

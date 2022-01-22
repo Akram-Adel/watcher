@@ -18,35 +18,40 @@ beforeEach(() => {
 });
 
 describe('getLinkedRoot', () => {
+  it('should throw when linkedProject is not provided', () => {
+    expect(() => getLinkedRoot(undefined)).toThrow(/Internal script error/);
+  });
+
   it('should throw when no/invalid link input', () => {
     (getInputWithFlag as jest.Mock).mockImplementationOnce(() => undefined);
 
-    expect(() => getLinkedRoot('')).toThrow(/No link provided/);
+    expect(() => getLinkedRoot('project')).toThrow(/No link provided/);
   });
 
   it('should throw when provided link is not in the configuration', () => {
     (getInputWithFlag as jest.Mock).mockImplementationOnce(() => 'link-invalid');
 
-    expect(() => getLinkedRoot('')).toThrow(/Provided link cannot be found/);
+    expect(() => getLinkedRoot('project')).toThrow(/Provided link cannot be found/);
   });
 
   it('should throw when provided link doesnt have root', () => {
     jest.setMock('../../../configs.json', ({ links: { link: { } } }));
 
-    expect(() => getLinkedRoot('')).toThrow(/Provided link does not have a root/);
+    expect(() => getLinkedRoot('project')).toThrow(/Provided link does not have a root/);
   });
 
   it('should throw when link root doesnt exist', () => {
     jest.setMock('../../../configs.json', ({ links: { link: { root: 'invalid' } } }));
 
-    expect(() => getLinkedRoot('')).toThrow(/Link root does not exist/);
-  });
-
-  it('should throw when linkedProject is not provided', () => {
-    expect(() => getLinkedRoot(undefined)).toThrow(/Internal script error/);
+    expect(() => getLinkedRoot('project')).toThrow(/Link root does not exist/);
   });
 
   it('should resolve linked root correctly provided correct input and link config', () => {
     expect(getLinkedRoot('project')).toBe('root/valid/node_modules/project');
+  });
+
+  it('should not search same linkedProject twice', () => {
+    expect(getLinkedRoot('project')).toBe('root/valid/node_modules/project');
+    expect(getInputWithFlag).not.toHaveBeenCalled();
   });
 });
