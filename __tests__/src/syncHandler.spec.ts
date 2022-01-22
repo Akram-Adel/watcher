@@ -1,7 +1,7 @@
 import fs from 'fs';
 
-import { SyncHandlerBase, SingleSyncHandler, LinkedSyncHandler } from '../../src/syncHandler';
 import getFile from '../../src/resolvers/getFile';
+import { SyncHandlerBase, SingleSyncHandler, LinkedSyncHandler } from '../../src/syncHandler';
 
 class TestSyncHandlerBase extends SyncHandlerBase {}
 

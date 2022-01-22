@@ -1,11 +1,10 @@
-import configs from '../../configs.json';
 import { Configs } from '../../configs.d';
 
 import { getInputWithFlag } from './utils';
 
 export default function getLinkedProjects(): Array<string> | never {
   const input = getInputWithFlag('link');
-  const { links } = configs as Configs;
+  const { links } = require('../../configs.json') as Configs;
 
   /* eslint-disable max-len */
   if (!input) throw new Error('No link provided, did you forget to add a --link= flag?');

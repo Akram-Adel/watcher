@@ -1,13 +1,12 @@
 import fs from 'fs';
 
-import configs from '../../configs.json';
 import { Configs } from '../../configs.d';
 
 import { getInputWithFlag, resolveRootWithProject } from './utils';
 
 export default function getLinkedRoot(linkedProject: string | undefined): string | never {
   const input = getInputWithFlag('link');
-  const { links } = configs as Configs;
+  const { links } = require('../../configs.json') as Configs;
 
   if (!input) throw new Error('No link provided, did you forget to add a --link= flag?');
   if (!links || !links[input]) throw new Error('Provided link cannot be found, check your links configs');

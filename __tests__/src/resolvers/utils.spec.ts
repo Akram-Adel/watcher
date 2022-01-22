@@ -10,15 +10,15 @@ jest.mock('project/package.json', () => ({ name: 'package.name' }), { virtual: t
 
 describe('utils.resolveRootWithProject', () => {
   it('should throw when the project doesnt have package.json file', () => {
-    (fs.existsSync as jest.Mock)
-      .mockImplementationOnce((i: string) => !i.includes('.json'));
+    (fs.existsSync as jest.Mock).mockImplementationOnce((i: string) => !i.includes('.json'));
 
-    expect(() => resolveRootWithProject('root', 'project')).toThrow(/No package.json found in project/);
+    expect(() => resolveRootWithProject('root', 'project'))
+      .toThrow(/No package.json found in project/);
   });
 
   it('should throw when the project package.json doesnt have name property', () => {
     jest.resetModules();
-    jest.setMock('project/package.json', ({ }));
+    jest.doMock('project/package.json', () => ({ }));
 
     expect(() => resolveRootWithProject('root', 'project'))
       .toThrow(/Project package.json does not have name value/);
@@ -26,7 +26,8 @@ describe('utils.resolveRootWithProject', () => {
 
   it('should resolve resolveRootWithProject correctly provided correct inputs', () => {
     jest.resetModules();
-    jest.setMock('project/package.json', ({ name: 'package.name' }));
+    jest.doMock('project/package.json', () => ({ name: 'package.name' }));
+
     expect(resolveRootWithProject('root', 'project')).toBe('root/node_modules/package.name');
   });
 });

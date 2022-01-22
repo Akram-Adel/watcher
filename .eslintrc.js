@@ -20,10 +20,13 @@ module.exports = {
   ],
   rules: {
     '@typescript-eslint/explicit-module-boundary-types': 'error',
+    '@typescript-eslint/no-var-requires': 'off',
     'array-element-newline': ['error', 'consistent'],
     'array-bracket-newline': ['error', { multiline: true }],
     'class-methods-use-this': 'off',
+    'global-require': 'off',
     'import/extensions': ['error', 'ignorePackages', { ts: 'never', tsx: 'never' }],
+    'import/no-dynamic-require': 'off',
     'import/no-unresolved': 'off',
     'lines-between-class-members': ['error', 'always', { exceptAfterSingleLine: true }],
     'max-classes-per-file': 'off',

@@ -1,4 +1,5 @@
 import getProject from '../../../src/resolvers/getProject';
+import { getInputWithFlag } from '../../../src/resolvers/utils';
 import getRoot from '../../../src/resolvers/getRoot';
 
 jest.mock('fs', () => ({
@@ -6,68 +7,68 @@ jest.mock('fs', () => ({
 }));
 
 jest.mock('../../../src/resolvers/getProject', () => jest.fn(() => 'project'));
-jest.mock('project/package.json', () => ({ name: 'package.name' }), { virtual: true });
-jest.mock('../../../configs.json', () => ({
-  defaultRoot: 'default/valid',
-  aliase: { aliase: 'resolved/valid' },
+jest.mock('../../../src/resolvers/utils', () => ({
+  getInputWithFlag: jest.fn(() => 'root'),
+  resolveRootWithProject: jest.fn((r, p) => `${r}/node_modules/${p}`),
 }));
+
+beforeEach(() => {
+  jest.resetModules();
+  jest.doMock('../../../configs.json', () => ({
+    defaultRoot: 'default/root',
+    aliase: { aliase: 'aliase/valid' },
+  }));
+});
 
 describe('getRoot', () => {
   it('should throw when no defaultRoot config and no root input', () => {
-    jest.resetModules();
-    jest.setMock('../../../configs.json', ({ }));
-    const getRootReq = require('../../../src/resolvers/getRoot').default;
+    jest.doMock('../../../configs.json', () => ({ }));
+    (getInputWithFlag as jest.Mock).mockImplementationOnce(() => undefined);
 
-    expect(() => getRootReq()).toThrow(/No root provided/);
+    expect(() => getRoot()).toThrow(/No root provided/);
   });
 
   it('should resolve root when provided defaultRoot and no root input', () => {
-    expect(getRoot()).toBe('default/valid/node_modules/package.name');
+    (getInputWithFlag as jest.Mock).mockImplementationOnce(() => undefined);
+
+    expect(getRoot()).toBe('default/root/node_modules/project');
   });
 
   it('should throw when no root input and provided defaultRoot is invalid', () => {
-    jest.resetModules();
     jest.setMock('../../../configs.json', ({ defaultRoot: 'default/invalid' }));
-    const getRootReq = require('../../../src/resolvers/getRoot').default;
+    (getInputWithFlag as jest.Mock).mockImplementationOnce(() => undefined);
 
-    expect(() => getRootReq()).toThrow(/Root does not exist/);
+    expect(() => getRoot()).toThrow(/Root does not exist/);
   });
 
   it('should resolve root when no aliases in configuration and input dir is valid', () => {
-    jest.resetModules();
     jest.setMock('../../../configs.json', ({ }));
-    const getRootReq = require('../../../src/resolvers/getRoot').default;
 
-    process.argv = ['node', 'jest', '--root=valid'];
-    expect(getRootReq()).toBe('valid/node_modules/package.name');
+    expect(getRoot()).toBe('root/node_modules/project');
   });
 
   it('should throw when no aliases in configuration and input dir is invalid', () => {
-    jest.resetModules();
     jest.setMock('../../../configs.json', ({ }));
-    const getRootReq = require('../../../src/resolvers/getRoot').default;
+    (getInputWithFlag as jest.Mock).mockImplementationOnce(() => 'invalid');
 
-    process.argv = ['node', 'jest', '--root=invalid'];
-    expect(() => getRootReq()).toThrow(/Root does not exist/);
+    expect(() => getRoot()).toThrow(/Root does not exist/);
   });
 
   it('should resolve aliase input', () => {
-    process.argv = ['node', 'jest', '--root=aliase'];
-    expect(getRoot()).toBe('resolved/valid/node_modules/package.name');
+    (getInputWithFlag as jest.Mock).mockImplementationOnce(() => 'aliase');
+
+    expect(getRoot()).toBe('aliase/valid/node_modules/project');
   });
 
   it('should throw when resolved aliase is invalid directory', () => {
-    jest.resetModules();
-    jest.setMock('../../../configs.json', ({ aliase: { aliase: 'resolved/invalid' } }));
-    const getRootReq = require('../../../src/resolvers/getRoot').default;
+    jest.setMock('../../../configs.json', ({ aliase: { aliase: 'aliase/invalid' } }));
+    (getInputWithFlag as jest.Mock).mockImplementationOnce(() => 'aliase');
 
-    process.argv = ['node', 'jest', '--root=aliase'];
-    expect(() => getRootReq()).toThrow(/Root does not exist/);
+    expect(() => getRoot()).toThrow(/Root does not exist/);
   });
 
   it('should resolve root when aliases is provided but doesnt match input', () => {
-    process.argv = ['node', 'jest', '--root=valid'];
-    expect(getRoot()).toBe('valid/node_modules/package.name');
+    expect(getRoot()).toBe('root/node_modules/project');
   });
 
   it('should throw when cant get the project', () => {

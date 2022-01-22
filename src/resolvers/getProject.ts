@@ -1,13 +1,12 @@
 import fs from 'fs';
 
-import configs from '../../configs.json';
 import { Configs } from '../../configs.d';
 
 import { getInputWithFlag } from './utils';
 
 export default function getProject(): string | never {
   const input = getInputWithFlag('project');
-  const { aliase } = configs as Configs;
+  const { aliase } = require('../../configs.json') as Configs;
 
   if (!input) throw new Error('No project provided, did you forget to add a --project= flag?');
 

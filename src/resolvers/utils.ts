@@ -3,7 +3,6 @@ import fs from 'fs';
 export function resolveRootWithProject(root: string, project: string): string {
   if (!fs.existsSync(`${project}/package.json`)) throw new Error(`No package.json found in ${project}`);
 
-  // eslint-disable-next-line @typescript-eslint/no-var-requires, import/no-dynamic-require, global-require
   const packageConfig = require(`${project}/package.json`);
   if (!packageConfig.name) throw new Error(`Project package.json does not have name value, check ${project}`);
 

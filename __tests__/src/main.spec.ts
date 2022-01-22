@@ -1,7 +1,8 @@
 import { doneCallback } from 'fb-watchman';
 
-import main, { client, subscriptionName, getSubscriptionObj } from '../../src/main';
+import { getInputWithFlag } from '../../src/resolvers/utils';
 import { SingleSyncHandler, LinkedSyncHandler } from '../../src/syncHandler';
+import main, { client, subscriptionName, getSubscriptionObj } from '../../src/main';
 
 const mockOnSubscription = { subscription: subscriptionName, files: [{ name: 'any' }], root: 'subRoot' };
 const mockWatchResponse = { watch: 'valid', relative_path: 'root' };
@@ -24,8 +25,9 @@ jest.mock('fs', () => ({ existsSync: jest.fn(() => true) }));
 jest.mock('../../src/syncHandler');
 jest.mock('../../src/resolvers/getProject', () => jest.fn(() => 'project'));
 jest.mock('../../src/resolvers/getLinkedProjects', () => jest.fn(() => ['project1', 'project2']));
-
-beforeEach(() => { process.argv = ['node', 'jest']; });
+jest.mock('../../src/resolvers/utils', () => ({
+  getInputWithFlag: jest.fn(() => undefined),
+}));
 
 describe('main', () => {
   it('should throw when watchman capabilities has an error', () => {
@@ -35,23 +37,34 @@ describe('main', () => {
     expect(() => main()).toThrow('capabilityCheck error');
   });
 
-  it('should create SingleSyncHandler and issue watch command when a directory is provided', () => {
+  it('should create SingleSyncHandler when a directory is provided', () => {
     main();
     expect(SingleSyncHandler).toHaveBeenCalled();
+  });
+
+  it('should issue watch commands once when a direcotry is provided', () => {
+    (client.command as jest.Mock).mockImplementationOnce(() => null);
+
+    main();
+    expect(client.command).toHaveBeenCalledTimes(1);
     expect(client.command).toHaveBeenCalledWith(['watch-project', 'project'], expect.anything());
   });
 
   it('should create LinkedSyncHandler when --link flag is provided', () => {
-    process.argv = ['node', 'jest', '--link=link'];
+    (getInputWithFlag as jest.Mock).mockImplementationOnce(() => 'link');
 
     main();
     expect(LinkedSyncHandler).toHaveBeenCalled();
   });
 
   it('should issue multiple watch commands for each project in the provided link', () => {
-    process.argv = ['node', 'jest', '--link=link'];
+    (getInputWithFlag as jest.Mock).mockImplementationOnce(() => 'link');
+    (client.command as jest.Mock)
+      .mockImplementationOnce(() => null)
+      .mockImplementationOnce(() => null);
 
     main();
+    expect(client.command).toHaveBeenCalledTimes(2);
     expect(client.command).toHaveBeenCalledWith(['watch-project', 'project1'], expect.anything());
     expect(client.command).toHaveBeenCalledWith(['watch-project', 'project2'], expect.anything());
   });
@@ -95,7 +108,7 @@ describe('main', () => {
   });
 
   it('should subscribe only once to client events for linked projects', () => {
-    process.argv = ['node', 'jest', '--link=link'];
+    (getInputWithFlag as jest.Mock).mockImplementationOnce(() => 'link');
 
     main();
     expect(client.on).toHaveBeenCalledTimes(1);

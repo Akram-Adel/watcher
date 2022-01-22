@@ -1,6 +1,5 @@
 import fs from 'fs';
 
-import configs from '../../configs.json';
 import { Configs } from '../../configs.d';
 
 import getProject from './getProject';
@@ -8,7 +7,7 @@ import { getInputWithFlag, resolveRootWithProject } from './utils';
 
 export default function getRoot(): string | never {
   const input = getInputWithFlag('root');
-  const { aliase, defaultRoot } = configs as Configs;
+  const { aliase, defaultRoot } = require('../../configs.json') as Configs;
 
   if (!defaultRoot && !input) throw new Error('No root provided, did you forget to add a --root= flag?');
 

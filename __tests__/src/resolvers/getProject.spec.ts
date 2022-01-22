@@ -1,54 +1,55 @@
+import { getInputWithFlag } from '../../../src/resolvers/utils';
 import getProject from '../../../src/resolvers/getProject';
 
 jest.mock('fs', () => ({
   existsSync: jest.fn((i: string) => !i.includes('invalid')),
 }));
 
-jest.mock('../../../configs.json', () => ({ aliase: { aliase: 'resolved/valid' } }));
+jest.mock('../../../src/resolvers/utils', () => ({
+  getInputWithFlag: jest.fn(() => 'project'),
+}));
+
+beforeEach(() => {
+  jest.resetModules();
+  jest.doMock('../../../configs.json', () => ({
+    aliase: { aliase: 'aliase/valid' },
+  }));
+});
 
 describe('getProject', () => {
   it('should throw when no/invalid project input', () => {
-    process.argv = ['node', 'jest'];
-    expect(() => getProject()).toThrow(/No project provided/);
+    (getInputWithFlag as jest.Mock).mockImplementationOnce(() => undefined);
 
-    process.argv = ['node', 'jest', 'invalid'];
     expect(() => getProject()).toThrow(/No project provided/);
   });
 
   it('should return input dir when no aliases in configuration and input dir is valid', () => {
-    jest.resetModules();
     jest.setMock('../../../configs.json', ({ }));
-    const getProjectReq = require('../../../src/resolvers/getProject').default;
 
-    process.argv = ['node', 'jest', '--project=valid'];
-    expect(getProjectReq()).toBe('valid');
+    expect(getProject()).toBe('project');
   });
 
   it('should throw when no aliases in configuration and input dir is invalid', () => {
-    jest.resetModules();
     jest.setMock('../../../configs.json', ({ }));
-    const getProjectReq = require('../../../src/resolvers/getProject').default;
+    (getInputWithFlag as jest.Mock).mockImplementationOnce(() => 'invalid');
 
-    process.argv = ['node', 'jest', '--project=invalid'];
-    expect(() => getProjectReq()).toThrow(/Project does not exist/);
+    expect(() => getProject()).toThrow(/Project does not exist/);
   });
 
   it('should resolve aliase inputs', () => {
-    process.argv = ['node', 'jest', '--project=aliase'];
-    expect(getProject()).toBe('resolved/valid');
+    (getInputWithFlag as jest.Mock).mockImplementationOnce(() => 'aliase');
+
+    expect(getProject()).toBe('aliase/valid');
   });
 
   it('should throw when resolved aliase is invalid directory', () => {
-    jest.resetModules();
-    jest.setMock('../../../configs.json', ({ aliase: { aliase: 'resolved/invalid' } }));
-    const getProjectReq = require('../../../src/resolvers/getProject').default;
+    jest.setMock('../../../configs.json', ({ aliase: { aliase: 'aliase/invalid' } }));
+    (getInputWithFlag as jest.Mock).mockImplementationOnce(() => 'aliase');
 
-    process.argv = ['node', 'jest', '--project=aliase'];
-    expect(() => getProjectReq()).toThrow(/Project does not exist/);
+    expect(() => getProject()).toThrow(/Project does not exist/);
   });
 
   it('should resolve root when aliases is provided but doesnt match input', () => {
-    process.argv = ['node', 'jest', '--project=valid'];
-    expect(getProject()).toBe('valid');
+    expect(getProject()).toBe('project');
   });
 });
