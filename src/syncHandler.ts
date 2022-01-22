@@ -1,13 +1,13 @@
 import fs from 'fs';
 
+import { File } from '../typings.d';
+
 import getFile from './resolvers/getFile';
 import getLinkedRoot from './resolvers/getLinkedRoot';
 import getProject from './resolvers/getProject';
 import getRoot from './resolvers/getRoot';
 
-export type File = { name: string, exists: boolean }
-export type LogColors = 'Green' | 'Yellow' | 'Red' | 'Magenta';
-
+type LogColors = 'Green' | 'Yellow' | 'Red' | 'Magenta';
 export abstract class SyncHandlerBase {
   get from(): string | undefined { return this.fromRoot; }
   protected fromRoot?: string

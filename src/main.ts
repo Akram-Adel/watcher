@@ -1,6 +1,8 @@
 import watchman from 'fb-watchman';
 
-import { File, SyncHandlerBase, SingleSyncHandler, LinkedSyncHandler } from './syncHandler';
+import { File } from '../typings.d';
+
+import { SyncHandlerBase, SingleSyncHandler, LinkedSyncHandler } from './syncHandler';
 import getLinkedProjects from './resolvers/getLinkedProjects';
 import getProject from './resolvers/getProject';
 import { getInputWithFlag } from './resolvers/utils';

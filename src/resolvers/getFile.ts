@@ -1,5 +1,4 @@
-import { Configs } from '../../configs.d';
-import { File } from '../syncHandler';
+import { File, Configs } from '../../typings.d';
 
 export default function getFile(file: File): File | undefined {
   if (noIgnoreMatchers()) return file;

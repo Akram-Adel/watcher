@@ -1,10 +1,10 @@
 import fs from 'fs';
 
-import { Configs } from '../../configs.d';
+import { Cache, Configs } from '../../typings.d';
 
 import { getInputWithFlag, resolveRootWithProject } from './utils';
 
-const linkedCache: {[key: string]: string} = {};
+const linkedCache: Cache = {};
 export default function getLinkedRoot(linkedProject: string | undefined): string | never {
   if (!linkedProject) throw new Error('Internal script error');
 

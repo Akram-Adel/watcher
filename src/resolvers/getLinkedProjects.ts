@@ -1,4 +1,4 @@
-import { Configs } from '../../configs.d';
+import { Configs } from '../../typings.d';
 
 import { getInputWithFlag } from './utils';
 

@@ -1,4 +1,5 @@
-import { File } from '../../../src/syncHandler';
+import { File } from '../../../typings.d';
+
 import getFile from '../../../src/resolvers/getFile';
 
 const mockFile: File = { name: 'name', exists: true };

@@ -1,6 +1,8 @@
 import fs from 'fs';
 
-const projectCache: {[key: string]: string} = {};
+import { Cache } from '../../typings.d';
+
+const projectCache: Cache = {};
 export function resolveRootWithProject(root: string, project: string): string {
   if (projectCache[project]) return resolve(root, projectCache[project]);
 
@@ -17,7 +19,7 @@ function resolve(root: string, project: string): string {
   return `${root}/node_modules/${project}`;
 }
 
-const flagCache: {[key: string]: string} = {};
+const flagCache: Cache = {};
 export function getInputWithFlag(flag: string): string | undefined | never {
   if (flagCache[flag]) return flagCache[flag];
 
