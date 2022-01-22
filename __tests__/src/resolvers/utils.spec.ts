@@ -42,7 +42,7 @@ describe('utils.resolveRootWithProject', () => {
 
 describe('utils.getInputFlag', () => {
   it('should throw when flag is not of correct shape', () => {
-    expect(() => getInputWithFlag('not correct')).toThrow(/Invalid request flag/);
+    expect(() => getInputWithFlag('not correct')).toThrow(/Internal script error/);
   });
 
   it('should return undefined when flag doesnt exist', () => {

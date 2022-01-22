@@ -20,7 +20,7 @@ function resolveRoot(root: string): string {
   if (!fs.existsSync(root)) throw new Error('Root does not exist, make sure that provided path is valid');
 
   const project = getProject();
-  if (!project) throw new Error('Internal script error');
+  if (!project) throw new Error('Internal script error, getRoot should not have been called before validating getProject first'); /* eslint-disable-line max-len */
 
   return resolveRootWithProject(root, project);
 }

@@ -23,7 +23,7 @@ const flagCache: Cache = {};
 export function getInputWithFlag(flag: string): string | undefined | never {
   if (flagCache[flag]) return flagCache[flag];
 
-  if (flag.includes(' ')) throw new Error(`Invalid request flag: ${flag}`);
+  if (flag.includes(' ')) throw new Error(`Internal script error, requested a flag with invalid format: ${flag}`); /* eslint-disable-line max-len */
 
   const fullFlag = `--${flag}=`;
   for (const input of process.argv) {

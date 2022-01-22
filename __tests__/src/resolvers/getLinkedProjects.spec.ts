@@ -20,7 +20,7 @@ describe('getLinkedProjects', () => {
   it('should throw when no/invalid link input', () => {
     (getInputWithFlag as jest.Mock).mockImplementationOnce(() => undefined);
 
-    expect(() => getLinkedProject()).toThrow(/No link provided/);
+    expect(() => getLinkedProject()).toThrow(/Internal script error/);
   });
 
   it('should throw when provided link is not in the configuration', () => {
