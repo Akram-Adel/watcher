@@ -72,7 +72,7 @@ function issueClockedSubscription(resp?: any) {
 type Obj = { [key: string]: any }
 export function getSubscriptionObj(clockResponse: Obj, watchResponse?: Obj): Obj {
   return {
-    expression: ['suffix', ['js', 'ts']],
+    expression: ['suffix', ['js', 'jsx', 'ts', 'tsx']],
     fields: ['name', 'exists'],
     since: clockResponse.clock,
     relative_root: watchResponse?.relative_path,
